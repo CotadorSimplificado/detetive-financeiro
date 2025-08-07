@@ -19,6 +19,24 @@ export const mockUsers: MockUser[] = [
     email: 'joao@exemplo.com',
     full_name: 'João Santos',
     avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: '4',
+    email: 'ana@exemplo.com',
+    full_name: 'Ana Costa',
+    avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: '5',
+    email: 'pedro@exemplo.com',
+    full_name: 'Pedro Oliveira',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: '6',
+    email: 'teste@exemplo.com',
+    full_name: 'Usuário Teste',
+    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face'
   }
 ];
 

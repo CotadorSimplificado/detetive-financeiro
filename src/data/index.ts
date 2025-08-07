@@ -96,6 +96,27 @@ export { deleteMockCreditCard } from './mock/creditCards';
 export { setDefaultCreditCard } from './mock/creditCards';
 export { markBillAsPaid } from './mock/bills';
 
+// Métodos de sessão e autenticação
+export const MockAuth = {
+  // Verificar se está autenticado
+  isAuthenticated: () => mockStore.isAuthenticated(),
+  
+  // Obter usuário atual
+  getCurrentUser: () => mockStore.getCurrentUser(),
+  
+  // Obter sessão atual
+  getCurrentSession: () => mockStore.getCurrentSession(),
+  
+  // Renovar sessão
+  refreshSession: () => mockStore.refreshSession(),
+  
+  // Verificar se sessão está expirando
+  isSessionExpiringSoon: () => mockStore.isSessionExpiringSoon(),
+  
+  // Resetar sessão
+  reset: () => mockStore.reset()
+};
+
 // Configurações e constantes
 export const MOCK_CONFIG = {
   // Delays simulados para operações

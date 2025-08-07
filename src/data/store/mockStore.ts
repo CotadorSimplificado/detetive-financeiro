@@ -111,6 +111,56 @@ import {
 export class MockStore {
   private currentUser: MockUser | null = null;
   private currentSession: MockSession | null = null;
+  private readonly SESSION_KEY = 'detetive_financeiro_mock_session';
+
+  constructor() {
+    // Tentar recuperar sessão do localStorage na inicialização
+    this.loadSessionFromStorage();
+  }
+
+  // ===== PERSISTÊNCIA DE SESSÃO =====
+
+  // Salvar sessão no localStorage
+  private saveSessionToStorage(): void {
+    if (this.currentSession) {
+      try {
+        localStorage.setItem(this.SESSION_KEY, JSON.stringify(this.currentSession));
+      } catch (error) {
+        console.warn('Erro ao salvar sessão no localStorage:', error);
+      }
+    }
+  }
+
+  // Carregar sessão do localStorage
+  private loadSessionFromStorage(): void {
+    try {
+      const sessionData = localStorage.getItem(this.SESSION_KEY);
+      if (sessionData) {
+        const session: MockSession = JSON.parse(sessionData);
+        
+        // Verificar se a sessão não expirou
+        if (session.expires_at > Date.now()) {
+          this.currentSession = session;
+          this.currentUser = session.user;
+        } else {
+          // Sessão expirada, remover do localStorage
+          this.clearSessionFromStorage();
+        }
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar sessão do localStorage:', error);
+      this.clearSessionFromStorage();
+    }
+  }
+
+  // Limpar sessão do localStorage
+  private clearSessionFromStorage(): void {
+    try {
+      localStorage.removeItem(this.SESSION_KEY);
+    } catch (error) {
+      console.warn('Erro ao limpar sessão do localStorage:', error);
+    }
+  }
 
   // ===== AUTENTICAÇÃO =====
   
@@ -133,6 +183,9 @@ export class MockStore {
         refresh_token: 'mock-refresh-token-' + Math.random().toString(36).substr(2, 9),
         expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
       };
+      
+      // Salvar sessão no localStorage
+      this.saveSessionToStorage();
       
       return { user, error: null };
     } catch (error) {
@@ -160,6 +213,9 @@ export class MockStore {
         expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
       };
       
+      // Salvar sessão no localStorage
+      this.saveSessionToStorage();
+      
       return { user: newUser, error: null };
     } catch (error) {
       return { user: null, error };
@@ -173,6 +229,9 @@ export class MockStore {
     
     this.currentUser = null;
     this.currentSession = null;
+    
+    // Limpar sessão do localStorage
+    this.clearSessionFromStorage();
   }
 
   // Obter usuário atual
@@ -187,7 +246,46 @@ export class MockStore {
 
   // Verificar se está autenticado
   isAuthenticated(): boolean {
-    return this.currentUser !== null && this.currentSession !== null;
+    if (!this.currentUser || !this.currentSession) {
+      return false;
+    }
+    
+    // Verificar se a sessão não expirou
+    if (this.currentSession.expires_at <= Date.now()) {
+      // Sessão expirada, limpar dados
+      this.currentUser = null;
+      this.currentSession = null;
+      this.clearSessionFromStorage();
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Renovar sessão (estender tempo de expiração)
+  async refreshSession(): Promise<boolean> {
+    if (!this.currentSession) {
+      return false;
+    }
+    
+    // Estender sessão por mais 24 horas
+    this.currentSession.expires_at = Date.now() + (24 * 60 * 60 * 1000);
+    this.currentSession.access_token = 'mock-access-token-' + Math.random().toString(36).substr(2, 9);
+    
+    // Salvar sessão atualizada no localStorage
+    this.saveSessionToStorage();
+    
+    return true;
+  }
+
+  // Verificar se a sessão está próxima de expirar (últimas 2 horas)
+  isSessionExpiringSoon(): boolean {
+    if (!this.currentSession) {
+      return false;
+    }
+    
+    const twoHoursFromNow = Date.now() + (2 * 60 * 60 * 1000);
+    return this.currentSession.expires_at <= twoHoursFromNow;
   }
 
   // ===== CONTAS =====
@@ -454,6 +552,7 @@ export class MockStore {
   reset(): void {
     this.currentUser = null;
     this.currentSession = null;
+    this.clearSessionFromStorage();
   }
 
   // Obter estatísticas gerais
