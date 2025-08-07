@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "../navigation/Sidebar";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
@@ -11,6 +12,7 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,8 +44,8 @@ export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps
         <Header 
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           user={{
-            name: "João Silva",
-            email: "joao.silva@email.com"
+            name: user?.user_metadata?.full_name || user?.email || "Usuário",
+            email: user?.email || ""
           }}
         />
         

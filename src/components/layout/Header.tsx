@@ -1,6 +1,7 @@
 import { Bell, Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -20,6 +21,12 @@ interface HeaderProps {
 }
 
 export const Header = ({ onMenuClick, title = "Dashboard", user }: HeaderProps) => {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -131,7 +138,7 @@ export const Header = ({ onMenuClick, title = "Dashboard", user }: HeaderProps) 
               <DropdownMenuItem>
                 Configurações
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}>
                 Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
