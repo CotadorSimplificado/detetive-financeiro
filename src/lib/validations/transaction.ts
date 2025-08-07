@@ -28,8 +28,8 @@ export const transferSchema = z.object({
   amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   date: z.date(),
   notes: z.string().optional(),
-  transfer_from_id: z.string().uuid("Conta de origem é obrigatória"),
-  transfer_to_id: z.string().uuid("Conta de destino é obrigatória"),
+  transfer_from_id: z.string().min(1, "Conta de origem é obrigatória"),
+  transfer_to_id: z.string().min(1, "Conta de destino é obrigatória"),
 }).refine(
   (data) => data.transfer_from_id !== data.transfer_to_id,
   {

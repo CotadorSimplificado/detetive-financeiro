@@ -43,7 +43,8 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
   
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
-  const createTransactionMutation = useCreateTransaction();
+  const createTransaction = useCreateTransaction();
+  const [isLoading, setIsLoading] = useState(false);
   
   const {
     numericValue: amountValue,
@@ -66,6 +67,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
   const incomeCategories = categories?.filter(cat => cat.type === 'INCOME') || [];
 
   const handleSubmit = async (data: IncomeFormData) => {
+    setIsLoading(true);
     try {
       if (data.transaction_type === "installment" && data.installments) {
         // Criar transações parceladas
@@ -95,7 +97,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
             paid_at: data.status === "completed" ? new Date().toISOString() : undefined,
           };
           
-          await createTransactionMutation.mutateAsync(transactionData);
+          await createTransaction(transactionData);
         }
       } else {
         // Criar transação única
@@ -115,12 +117,14 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
           paid_at: data.status === "completed" ? new Date().toISOString() : undefined,
         };
         
-        await createTransactionMutation.mutateAsync(transactionData);
+        await createTransaction(transactionData);
       }
       
       onSuccess();
     } catch (error) {
       console.error('Error creating income:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -328,10 +332,10 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
         </Button>
         <Button 
           type="submit" 
-          disabled={createTransactionMutation.isPending || !amountValue}
+          disabled={isLoading || !amountValue}
           className="flex-1"
         >
-          {createTransactionMutation.isPending ? "Criando..." : "Criar Receita"}
+          {isLoading ? "Criando..." : "Criar Receita"}
         </Button>
       </div>
     </form>
