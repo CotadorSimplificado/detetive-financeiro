@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { AuthTest } from '@/components/auth/AuthTest';
 import { Shield, TrendingUp } from 'lucide-react';
 
 const Auth = () => {
@@ -51,7 +52,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-4xl flex gap-6 items-start">
+        {/* Painel Principal de Autenticação */}
+        <div className="w-full max-w-md space-y-6">
         {/* Logo and Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
@@ -152,6 +155,30 @@ const Auth = () => {
           </CardContent>
         </Card>
 
+        {/* Credenciais de Teste */}
+        <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                🔑 Credenciais de Teste
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Email: usuario@exemplo.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">Senha: qualquer_senha</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Email: maria@exemplo.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">Senha: qualquer_senha</p>
+                </div>
+                <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+                  💡 Sistema mock: qualquer senha funcionará para os emails listados
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Features Preview */}
         <Card className="bg-gradient-card border-border/50">
           <CardContent className="pt-6">
@@ -166,6 +193,12 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
+
+        {/* Painel de Testes (desenvolvimento) */}
+        <div className="hidden lg:block">
+          <AuthTest />
+        </div>
       </div>
     </div>
   );
