@@ -95,11 +95,11 @@ export function useTransactions(filters?: TransactionFilters) {
         .from('transactions')
         .select(`
           *,
-          account:accounts(id, name, color, icon),
+          account:accounts!transactions_account_id_fkey(id, name, color, icon),
           card:credit_cards(id, name, color, brand),
           category:categories(id, name, color, icon, type),
-          transfer_from_account:accounts!transfer_from_id(id, name, color),
-          transfer_to_account:accounts!transfer_to_id(id, name, color)
+          transfer_from_account:accounts!transactions_transfer_from_id_fkey(id, name, color),
+          transfer_to_account:accounts!transactions_transfer_to_id_fkey(id, name, color)
         `)
         .is('deleted_at', null)
         .order('date', { ascending: false })
