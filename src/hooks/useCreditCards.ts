@@ -1,3 +1,22 @@
 // Compatibilidade: Re-exporta o hook mock de cartões de crédito
-export { useMockCreditCards as useCreditCards } from '@/data/hooks/useMockCreditCards';
+import { useMockCreditCards } from '@/data/hooks/useMockCreditCards';
+
+export const useCreditCards = useMockCreditCards;
+
+// Hooks individuais para compatibilidade
+export const useCreateCreditCard = () => {
+  const { createCreditCard } = useMockCreditCards();
+  return createCreditCard;
+};
+
+export const useUpdateCreditCard = () => {
+  const { updateCreditCard } = useMockCreditCards();
+  return updateCreditCard;
+};
+
+export const useDeleteCreditCard = () => {
+  const { deleteCreditCard } = useMockCreditCards();
+  return deleteCreditCard;
+};
+
 export type { CreditCard } from '@/data/types';

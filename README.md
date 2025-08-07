@@ -1,73 +1,137 @@
-# Welcome to your Lovable project
+# 🕵️ Detetive Financeiro
 
-## Project info
+Sistema de Gestão Financeira Pessoal Inteligente com dados mock para desenvolvimento e demonstração.
 
-**URL**: https://lovable.dev/projects/2eda8d87-b191-4d5b-8795-4b8a8d36c49b
+## 📋 Sobre o Projeto
 
-## How can I edit this code?
+O **Detetive Financeiro** é uma aplicação web responsiva para controle financeiro pessoal que utiliza dados mock para desenvolvimento offline e demonstrações. O sistema oferece funcionalidades completas de gestão financeira sem dependência de banco de dados externo.
 
-There are several ways of editing your application.
+## 🚀 Funcionalidades Principais
 
-**Use Lovable**
+- ✅ **Autenticação Mock**: Sistema de login/logout simulado
+- ✅ **Dashboard Inteligente**: Visão geral das finanças com cards personalizáveis
+- ✅ **Gestão de Contas**: Múltiplas contas bancárias e carteiras
+- ✅ **Transações**: CRUD completo com categorização automática
+- ✅ **Cartões de Crédito**: Controle de faturas e limites
+- ✅ **Transferências**: Entre contas com validação de saldo
+- ✅ **Relatórios**: Gráficos e análises visuais
+- ✅ **Dados Mock**: Sistema completo funcionando offline
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2eda8d87-b191-4d5b-8795-4b8a8d36c49b) and start prompting.
+## 🛠️ Como executar o projeto
 
-Changes made via Lovable will be committed automatically to this repo.
+### Pré-requisitos
 
-**Use your preferred IDE**
+- Node.js 18+ 
+- npm ou yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Instalação
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# 1. Clone o repositório
+git clone <URL_DO_REPOSITORIO>
 
-Follow these steps:
+# 2. Navegue para o diretório
+cd detetive-financeiro
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 3. Instale as dependências
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+O projeto estará disponível em `http://localhost:8080` (ou outra porta disponível).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔑 Credenciais de Teste
 
-**Use GitHub Codespaces**
+Para acessar o sistema, use qualquer uma das credenciais abaixo:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+Email: usuario@exemplo.com
+Senha: qualquer_senha
 
-## What technologies are used for this project?
+Email: maria@exemplo.com  
+Senha: qualquer_senha
 
-This project is built with:
+Email: joao@exemplo.com
+Senha: qualquer_senha
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+> **Nota**: O sistema de autenticação é mock, então qualquer senha funcionará.
 
-## How can I deploy this project?
+## 🗂️ Estrutura dos Dados Mock
 
-Simply open [Lovable](https://lovable.dev/projects/2eda8d87-b191-4d5b-8795-4b8a8d36c49b) and click on Share -> Publish.
+### Usuários
+- 3 usuários de exemplo com perfis diferentes
+- Dados pessoais e avatars realistas
 
-## Can I connect a custom domain to my Lovable project?
+### Contas Bancárias
+- Conta corrente, poupança e carteira
+- Saldos realistas e histórico
+- Múltiplas instituições financeiras
 
-Yes, you can!
+### Transações
+- 6 meses de histórico financeiro
+- Categorias diversificadas (alimentação, transporte, lazer, etc.)
+- Receitas e despesas equilibradas
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Cartões de Crédito
+- Múltiplos cartões com limites
+- Faturas abertas e pagas
+- Transações parceladas
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🏗️ Tecnologias Utilizadas
+
+- **Frontend**: React 18 + TypeScript
+- **Build**: Vite
+- **UI**: shadcn/ui + Tailwind CSS
+- **Estado**: Context API + Zustand
+- **Ícones**: Lucide React
+- **Formulários**: React Hook Form + Zod
+- **Gráficos**: Recharts
+- **Persistência**: localStorage (dados mock)
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── components/          # Componentes React
+│   ├── auth/           # Autenticação
+│   ├── dashboard/      # Dashboard
+│   ├── accounts/       # Gestão de contas
+│   ├── transactions/   # Transações
+│   ├── cards/          # Cartões de crédito
+│   └── ui/             # Componentes base
+├── data/               # Sistema de dados mock
+│   ├── mock/          # Dados de exemplo
+│   ├── hooks/         # Hooks customizados
+│   ├── store/         # Store centralizado
+│   └── types/         # Tipos TypeScript
+├── hooks/             # Hooks de compatibilidade
+├── lib/               # Utilitários
+└── pages/             # Páginas da aplicação
+```
+
+## 🎯 Próximos Passos
+
+- [ ] Adicionar mais dados mock realistas
+- [ ] Implementar modo escuro completo
+- [ ] Adicionar testes automatizados
+- [ ] Melhorar responsividade mobile
+- [ ] Adicionar PWA (Progressive Web App)
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
+
+---
+
+**Desenvolvido com ❤️ para demonstração de sistema financeiro completo**
