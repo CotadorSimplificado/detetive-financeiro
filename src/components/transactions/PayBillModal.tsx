@@ -81,7 +81,7 @@ export function PayBillModal({ bill, open, onOpenChange }: PayBillModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="pay-bill-description">
         <DialogHeader>
           <DialogTitle>Pagar Fatura</DialogTitle>
         </DialogHeader>
@@ -108,6 +108,7 @@ export function PayBillModal({ bill, open, onOpenChange }: PayBillModalProps) {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <p id="pay-bill-description" className="sr-only">Informe a conta de débito e a data do pagamento da fatura selecionada.</p>
               <FormField
                 control={form.control}
                 name="account_id"

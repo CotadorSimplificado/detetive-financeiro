@@ -22,13 +22,15 @@ export function CreditCardModal({
 }: CreditCardModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="credit-card-form-description">
         <DialogHeader>
           <DialogTitle>
             {editingCard ? "Editar Cartão" : "Novo Cartão"}
           </DialogTitle>
         </DialogHeader>
         
+        <div id="credit-card-form-description" className="sr-only">Preencha os dados do cartão e salve as alterações.</div>
+
         <CreditCardForm
           onSubmit={onSubmit}
           onCancel={onClose}
