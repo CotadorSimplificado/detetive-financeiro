@@ -8,6 +8,7 @@ import {
 import { TransactionTypeDialog } from "./TransactionTypeDialog";
 import { IncomeForm } from "./IncomeForm";
 import { ExpenseForm } from "./ExpenseForm";
+import { CreditCardExpenseForm } from "./CreditCardExpenseForm";
 import { TransferForm } from "./TransferForm";
 
 interface TransactionModalProps {
@@ -15,7 +16,7 @@ interface TransactionModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type TransactionType = 'income' | 'expense' | 'transfer' | null;
+type TransactionType = 'income' | 'expense' | 'credit_card_expense' | 'transfer' | null;
 
 export function TransactionModal({ open, onOpenChange }: TransactionModalProps) {
   const [selectedType, setSelectedType] = useState<TransactionType>(null);
@@ -43,6 +44,8 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
         return 'Nova Receita';
       case 'expense':
         return 'Nova Despesa';
+      case 'credit_card_expense':
+        return 'Nova Despesa no Cartão';
       case 'transfer':
         return 'Nova Transferência';
       default:
@@ -56,6 +59,8 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
         return <IncomeForm onSuccess={handleSuccess} onCancel={handleBack} />;
       case 'expense':
         return <ExpenseForm onSuccess={handleSuccess} onCancel={handleBack} />;
+      case 'credit_card_expense':
+        return <CreditCardExpenseForm onSuccess={handleSuccess} onCancel={handleBack} />;
       case 'transfer':
         return <TransferForm onSuccess={handleSuccess} onCancel={handleBack} />;
       default:

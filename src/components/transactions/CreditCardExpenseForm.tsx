@@ -14,34 +14,34 @@ import { CalendarIcon, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { useAccounts } from "@/hooks/useAccounts";
+import { useCreditCards } from "@/hooks/useCreditCards";
 import { useCategories } from "@/hooks/useCategories";
 import { useCreateTransaction } from "@/hooks/useTransactions";
 import { useCurrencyInput } from "@/hooks/useCurrencyInput";
 
-const incomeSchema = z.object({
+const creditCardExpenseSchema = z.object({
   description: z.string().min(1, "Descrição é obrigatória"),
   amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   date: z.date(),
   notes: z.string().optional(),
   category_id: z.string().uuid("Categoria é obrigatória"),
-  account_id: z.string().uuid("Conta é obrigatória"),
+  card_id: z.string().uuid("Cartão é obrigatório"),
   transaction_type: z.enum(["single", "installment"]),
   installments: z.number().min(1).max(60).optional(),
   status: z.enum(["completed", "pending"]),
 });
 
-type IncomeFormData = z.infer<typeof incomeSchema>;
+type CreditCardExpenseFormData = z.infer<typeof creditCardExpenseSchema>;
 
-interface IncomeFormProps {
+interface CreditCardExpenseFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
+export function CreditCardExpenseForm({ onSuccess, onCancel }: CreditCardExpenseFormProps) {
   const [showCalendar, setShowCalendar] = useState(false);
   
-  const { data: accounts } = useAccounts();
+  const { data: cards } = useCreditCards();
   const { data: categories } = useCategories();
   const createTransactionMutation = useCreateTransaction();
   
@@ -52,8 +52,8 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
     handleChange: onAmountChange,
   } = useCurrencyInput();
 
-  const form = useForm<IncomeFormData>({
-    resolver: zodResolver(incomeSchema),
+  const form = useForm<CreditCardExpenseFormData>({
+    resolver: zodResolver(creditCardExpenseSchema),
     defaultValues: {
       date: new Date(),
       transaction_type: "single",
@@ -63,9 +63,9 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
   });
 
   const transactionType = form.watch("transaction_type");
-  const incomeCategories = categories?.filter(cat => cat.type === 'INCOME') || [];
+  const expenseCategories = categories?.filter(cat => cat.type === 'EXPENSE') || [];
 
-  const handleSubmit = async (data: IncomeFormData) => {
+  const handleSubmit = async (data: CreditCardExpenseFormData) => {
     try {
       if (data.transaction_type === "installment" && data.installments) {
         // Criar transações parceladas
@@ -77,12 +77,12 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
           installmentDate.setMonth(installmentDate.getMonth() + i);
           
           const transactionData = {
-            type: 'INCOME' as const,
+            type: 'EXPENSE' as const,
             amount: amountValue / data.installments,
             description: `${data.description} (${i + 1}/${data.installments})`,
             notes: data.notes,
             date: installmentDate.toISOString().split('T')[0],
-            account_id: data.account_id,
+            card_id: data.card_id,
             category_id: data.category_id,
             is_installment: true,
             installment_number: i + 1,
@@ -100,12 +100,12 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
       } else {
         // Criar transação única
         const transactionData = {
-          type: 'INCOME' as const,
+          type: 'EXPENSE' as const,
           amount: amountValue,
           description: data.description,
           notes: data.notes,
           date: data.date.toISOString().split('T')[0],
-          account_id: data.account_id,
+          card_id: data.card_id,
           category_id: data.category_id,
           is_installment: false,
           is_transfer: false,
@@ -120,7 +120,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
       
       onSuccess();
     } catch (error) {
-      console.error('Error creating income:', error);
+      console.error('Error creating credit card expense:', error);
     }
   };
 
@@ -131,7 +131,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h3 className="font-medium">Nova Receita</h3>
+        <h3 className="font-medium">Nova Despesa no Cartão</h3>
       </div>
 
       {/* Descrição */}
@@ -139,7 +139,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
         <Label htmlFor="description">Descrição</Label>
         <Input
           id="description"
-          placeholder="Ex: Salário, freelance"
+          placeholder="Ex: Compra no supermercado"
           {...form.register("description")}
         />
         {form.formState.errors.description && (
@@ -161,29 +161,30 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
         )}
       </div>
 
-      {/* Conta */}
+      {/* Cartão */}
       <div className="space-y-2">
-        <Label>Conta</Label>
-        <Select onValueChange={(value) => form.setValue("account_id", value)}>
+        <Label>Cartão de Crédito</Label>
+        <Select onValueChange={(value) => form.setValue("card_id", value)}>
           <SelectTrigger>
-            <SelectValue placeholder="Selecione a conta" />
+            <SelectValue placeholder="Selecione o cartão" />
           </SelectTrigger>
           <SelectContent>
-            {accounts?.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
+            {cards?.map((card) => (
+              <SelectItem key={card.id} value={card.id}>
                 <div className="flex items-center gap-2">
                   <div 
                     className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: account.color || '#2196F3' }}
+                    style={{ backgroundColor: card.color || '#FF9800' }}
                   />
-                  {account.name}
+                  {card.name}
+                  {card.last_digits && <span className="text-muted-foreground">•••• {card.last_digits}</span>}
                 </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {form.formState.errors.account_id && (
-          <p className="text-sm text-destructive">{form.formState.errors.account_id.message}</p>
+        {form.formState.errors.card_id && (
+          <p className="text-sm text-destructive">{form.formState.errors.card_id.message}</p>
         )}
       </div>
 
@@ -195,7 +196,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
             <SelectValue placeholder="Selecione a categoria" />
           </SelectTrigger>
           <SelectContent>
-            {incomeCategories.map((category) => (
+            {expenseCategories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 <div className="flex items-center gap-2">
                   {category.icon && <span>{category.icon}</span>}
@@ -331,7 +332,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
           disabled={createTransactionMutation.isPending || !amountValue}
           className="flex-1"
         >
-          {createTransactionMutation.isPending ? "Criando..." : "Criar Receita"}
+          {createTransactionMutation.isPending ? "Criando..." : "Criar Despesa"}
         </Button>
       </div>
     </form>

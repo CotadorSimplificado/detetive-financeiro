@@ -17,7 +17,7 @@ import {
 interface TransactionTypeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onTransactionTypeSelect: (type: 'income' | 'expense' | 'transfer') => void;
+  onTransactionTypeSelect: (type: 'income' | 'expense' | 'credit_card_expense' | 'transfer') => void;
 }
 
 export function TransactionTypeDialog({ 
@@ -67,6 +67,22 @@ export function TransactionTypeDialog({
               <div className="font-medium">Despesa</div>
               <div className="text-sm text-muted-foreground">
                 Registrar saída de dinheiro
+              </div>
+            </div>
+          </Button>
+
+          <Button
+            onClick={() => onTransactionTypeSelect('credit_card_expense')}
+            variant="outline"
+            className="flex items-center justify-start gap-3 h-16 border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5"
+          >
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <Plus className="w-5 h-5 text-orange-500" />
+            </div>
+            <div className="text-left">
+              <div className="font-medium">Despesa no Cartão</div>
+              <div className="text-sm text-muted-foreground">
+                Registrar compra no cartão de crédito
               </div>
             </div>
           </Button>
