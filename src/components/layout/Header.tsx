@@ -1,5 +1,6 @@
 import { Bell, Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -66,6 +67,9 @@ export const Header = ({ onMenuClick, title = "Dashboard", user }: HeaderProps) 
 
         {/* Right section */}
         <div className="flex items-center gap-3">
+          {/* Theme toggle */}
+          <ThemeToggle />
+          
           {/* Search mobile */}
           <Button variant="ghost" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
