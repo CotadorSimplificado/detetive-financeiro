@@ -62,12 +62,17 @@ export function AccountModal({ open, onOpenChange, account, mode }: AccountModal
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          aria-describedby="account-form-description"
+        >
           <DialogHeader>
             <DialogTitle>
               {mode === 'create' ? 'Nova Conta' : 'Editar Conta'}
             </DialogTitle>
           </DialogHeader>
+
+          <div id="account-form-description">
 
           <AccountForm
             onSubmit={handleSubmit}
@@ -88,6 +93,7 @@ export function AccountModal({ open, onOpenChange, account, mode }: AccountModal
               </button>
             </div>
           )}
+          </div>
         </DialogContent>
       </Dialog>
 

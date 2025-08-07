@@ -81,12 +81,15 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
           if (!open) handleClose();
         }}
       >
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="sm:max-w-md max-h-[90vh] overflow-y-auto"
+          aria-describedby="transaction-form-description"
+        >
           <DialogHeader>
             <DialogTitle>{getTitle()}</DialogTitle>
           </DialogHeader>
           
-          <div className="py-4">
+          <div id="transaction-form-description" className="py-4">
             {renderForm()}
           </div>
         </DialogContent>

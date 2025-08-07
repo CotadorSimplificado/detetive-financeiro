@@ -184,6 +184,7 @@ export function TransactionForm({
                       date > new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -201,7 +202,7 @@ export function TransactionForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoria *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma categoria" />

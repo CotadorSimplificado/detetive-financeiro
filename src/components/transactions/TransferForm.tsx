@@ -163,7 +163,7 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conta de Origem *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Conta que enviará o dinheiro" />
@@ -194,7 +194,7 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conta de Destino *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Conta que receberá o dinheiro" />

@@ -27,10 +27,13 @@ export function TransactionTypeDialog({
 }: TransactionTypeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md"
+        aria-describedby="transaction-type-description"
+      >
         <DialogHeader>
           <DialogTitle>Nova Transação</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="transaction-type-description">
             Escolha o tipo de transação que deseja registrar
           </DialogDescription>
         </DialogHeader>

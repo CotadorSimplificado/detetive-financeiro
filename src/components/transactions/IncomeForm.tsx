@@ -109,7 +109,7 @@ export function IncomeForm({ onSuccess, onCancel }: IncomeFormProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Conta *</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma conta" />

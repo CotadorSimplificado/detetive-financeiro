@@ -64,7 +64,7 @@ export function AccountForm({ onSubmit, onCancel, defaultValues, isLoading, subm
 
         <div className="space-y-2">
           <Label htmlFor="type">Tipo de Conta</Label>
-          <Select value={selectedType} onValueChange={(value) => setValue("type", value as any)}>
+          <Select value={selectedType || ""} onValueChange={(value) => setValue("type", value as any)}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>

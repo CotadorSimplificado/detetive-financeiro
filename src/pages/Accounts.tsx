@@ -110,7 +110,7 @@ export default function Accounts() {
             />
           </div>
           
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter || "all"} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-full sm:w-48">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
