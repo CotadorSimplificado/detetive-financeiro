@@ -14,17 +14,26 @@ export const useCreditCards = () => {
 // Hooks individuais para compatibilidade
 export const useCreateCreditCard = () => {
   const { createCreditCard } = useMockCreditCards();
-  return createCreditCard;
+  return {
+    mutateAsync: createCreditCard,
+    isPending: false,
+  };
 };
 
 export const useUpdateCreditCard = () => {
   const { updateCreditCard } = useMockCreditCards();
-  return updateCreditCard;
+  return {
+    mutateAsync: updateCreditCard,
+    isPending: false,
+  };
 };
 
 export const useDeleteCreditCard = () => {
   const { deleteCreditCard } = useMockCreditCards();
-  return deleteCreditCard;
+  return {
+    mutateAsync: deleteCreditCard,
+    isPending: false,
+  };
 };
 
 export type { CreditCard } from '@/data/types';

@@ -815,8 +815,10 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
   };
 
   const setDefaultCreditCard = async (id: string) => {
+    if (!state.user) return false;
+    
     try {
-      const success = await mockStore.setDefaultCreditCard(id);
+      const success = await mockStore.setDefaultCreditCard(state.user.id, id);
       if (success) {
         // Recarregar cartões para refletir mudanças
         await fetchCreditCards();
@@ -843,7 +845,9 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
     
     dispatch({ type: 'SET_BILLS_LOADING', payload: true });
     try {
-      const bills = await mockStore.getCreditCardBills(state.user.id);
+      // Obter IDs dos cartões do usuário
+      const userCardIds = state.creditCards.map(card => card.id);
+      const bills = await mockStore.getCreditCardBills(state.user.id, userCardIds);
       dispatch({ type: 'SET_CREDIT_CARD_BILLS', payload: bills });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao carregar faturas' });
@@ -853,42 +857,21 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
   };
 
   const createCreditCardBill = async (data: CreateCreditCardBill) => {
-    try {
-      const bill = await mockStore.createCreditCardBill(data);
-      if (bill) {
-        dispatch({ type: 'ADD_CREDIT_CARD_BILL', payload: bill });
-      }
-      return bill;
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Erro ao criar fatura' });
-      return null;
-    }
+    // TODO: Implementar criação de faturas no mockStore
+    console.warn('Criação de faturas não implementada ainda');
+    return null;
   };
 
   const updateCreditCardBill = async (id: string, data: UpdateCreditCardBill) => {
-    try {
-      const bill = await mockStore.updateCreditCardBill(id, data);
-      if (bill) {
-        dispatch({ type: 'UPDATE_CREDIT_CARD_BILL', payload: bill });
-      }
-      return bill;
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Erro ao atualizar fatura' });
-      return null;
-    }
+    // TODO: Implementar atualização de faturas no mockStore
+    console.warn('Atualização de faturas não implementada ainda');
+    return null;
   };
 
   const deleteCreditCardBill = async (id: string) => {
-    try {
-      const success = await mockStore.deleteCreditCardBill(id);
-      if (success) {
-        dispatch({ type: 'DELETE_CREDIT_CARD_BILL', payload: id });
-      }
-      return success;
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Erro ao deletar fatura' });
-      return false;
-    }
+    // TODO: Implementar exclusão de faturas no mockStore
+    console.warn('Exclusão de faturas não implementada ainda');
+    return false;
   };
 
   const getBillById = (id: string) => {
@@ -936,8 +919,9 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
     
     dispatch({ type: 'SET_BUDGETS_LOADING', payload: true });
     try {
-      const budgets = await mockStore.getBudgets(state.user.id);
-      dispatch({ type: 'SET_BUDGETS', payload: budgets });
+      // TODO: Implementar busca de orçamentos no mockStore
+      console.warn('Busca de orçamentos não implementada ainda');
+      dispatch({ type: 'SET_BUDGETS', payload: [] });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao carregar orçamentos' });
     } finally {
@@ -949,11 +933,9 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
     if (!state.user) return null;
     
     try {
-      const budget = await mockStore.createBudget({ ...data, user_id: state.user.id });
-      if (budget) {
-        dispatch({ type: 'ADD_BUDGET', payload: budget });
-      }
-      return budget;
+      // TODO: Implementar criação de orçamentos no mockStore
+      console.warn('Criação de orçamentos não implementada ainda');
+      return null;
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao criar orçamento' });
       return null;
@@ -962,11 +944,9 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
 
   const updateBudget = async (id: string, data: UpdateBudget) => {
     try {
-      const budget = await mockStore.updateBudget(id, data);
-      if (budget) {
-        dispatch({ type: 'UPDATE_BUDGET', payload: budget });
-      }
-      return budget;
+      // TODO: Implementar atualização de orçamentos no mockStore
+      console.warn('Atualização de orçamentos não implementada ainda');
+      return null;
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao atualizar orçamento' });
       return null;
@@ -975,11 +955,9 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
 
   const deleteBudget = async (id: string) => {
     try {
-      const success = await mockStore.deleteBudget(id);
-      if (success) {
-        dispatch({ type: 'DELETE_BUDGET', payload: id });
-      }
-      return success;
+      // TODO: Implementar exclusão de orçamentos no mockStore
+      console.warn('Exclusão de orçamentos não implementada ainda');
+      return false;
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao deletar orçamento' });
       return false;

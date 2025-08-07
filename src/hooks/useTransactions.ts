@@ -1,7 +1,30 @@
 // Compatibilidade: Re-exporta o hook mock de transações
 import { useMockTransactions } from '@/data/hooks/useMockTransactions';
 
-export const useTransactions = useMockTransactions;
+export const useTransactions = (filters?: any) => {
+  const mockResult = useMockTransactions();
+  
+  // Aplicar filtros se fornecidos
+  let filteredTransactions = mockResult.transactions;
+  if (filters) {
+    if (filters.type && filters.type !== 'all') {
+      filteredTransactions = filteredTransactions.filter(t => t.type === filters.type);
+    }
+    if (filters.search) {
+      filteredTransactions = filteredTransactions.filter(t => 
+        t.description.toLowerCase().includes(filters.search.toLowerCase())
+      );
+    }
+    // Filtros de competência podem ser implementados aqui se necessário
+  }
+  
+  return {
+    data: filteredTransactions,
+    isLoading: mockResult.loading,
+    error: mockResult.error,
+    ...mockResult
+  };
+};
 
 // Hooks individuais para compatibilidade
 export const useCreateTransaction = () => {
@@ -19,7 +42,7 @@ export const useDeleteTransaction = () => {
   return deleteTransaction;
 };
 
-export const useTransactionsSummary = () => {
+export const useTransactionsSummary = (filters?: any) => {
   const { 
     totalIncome, 
     totalExpenses, 
@@ -28,13 +51,34 @@ export const useTransactionsSummary = () => {
     transferTransactions 
   } = useMockTransactions();
   
+  // Aplicar filtros aos cálculos se necessário
+  let filteredIncome = incomeTransactions;
+  let filteredExpenses = expenseTransactions;
+  let filteredTransfers = transferTransactions;
+  
+  if (filters) {
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredIncome = filteredIncome.filter(t => t.description.toLowerCase().includes(searchLower));
+      filteredExpenses = filteredExpenses.filter(t => t.description.toLowerCase().includes(searchLower));
+      filteredTransfers = filteredTransfers.filter(t => t.description.toLowerCase().includes(searchLower));
+    }
+  }
+  
+  const income = filteredIncome.reduce((sum, t) => sum + (t.amount || 0), 0);
+  const expenses = filteredExpenses.reduce((sum, t) => sum + (t.amount || 0), 0);
+  
   return {
-    totalIncome,
-    totalExpenses,
-    balance: totalIncome - totalExpenses,
-    incomeCount: incomeTransactions.length,
-    expenseCount: expenseTransactions.length,
-    transferCount: transferTransactions.length,
+    data: {
+      income,
+      expenses,
+      balance: income - expenses,
+      incomeCount: filteredIncome.length,
+      expenseCount: filteredExpenses.length,
+      transferCount: filteredTransfers.length,
+    },
+    isLoading: false,
+    error: null
   };
 };
 
