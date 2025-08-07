@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link } from "react-router-dom";
 import { 
   Home, 
   ArrowLeftRight, 
@@ -151,16 +152,12 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange }: Sid
                       "w-full justify-start h-10 text-sm mb-1",
                       isActive && "bg-primary/10 text-primary border-r-2 border-r-primary"
                     )}
-                    onClick={() => {
-                      if (item.href) {
-                        window.location.href = item.href;
-                      } else {
-                        onTabChange?.(item.id);
-                      }
-                    }}
+                    asChild
                   >
-                    <Icon className="mr-3 h-4 w-4" />
-                    {item.label}
+                    <Link to={item.href}>
+                      <Icon className="mr-3 h-4 w-4" />
+                      {item.label}
+                    </Link>
                   </Button>
                 );
               })}

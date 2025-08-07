@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "../navigation/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +14,23 @@ interface MainLayoutProps {
 export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+
+  // Auto-detect active tab based on current route if not explicitly provided
+  const getActiveTabFromRoute = () => {
+    const path = location.pathname;
+    if (path === "/") return "dashboard";
+    if (path === "/accounts") return "accounts";
+    if (path === "/transactions") return "transactions";
+    if (path === "/cards") return "cards";
+    if (path === "/budgets") return "budgets";
+    if (path === "/goals") return "goals";
+    if (path === "/reports") return "reports";
+    if (path === "/investments") return "investments";
+    return "dashboard";
+  };
+
+  const currentActiveTab = activeTab || getActiveTabFromRoute();
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +49,7 @@ export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar 
-          activeTab={activeTab} 
+          activeTab={currentActiveTab} 
           onTabChange={(tab) => {
             onTabChange?.(tab);
             setSidebarOpen(false);
