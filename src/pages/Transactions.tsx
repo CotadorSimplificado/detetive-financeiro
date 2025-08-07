@@ -10,13 +10,21 @@ import { InlineLoading } from "@/components/ui/loading";
 import { useTransactions, useTransactionsSummary, type TransactionFilters } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
+import { formatDateBR, isCurrentMonth } from "@/lib/date-utils";
 import { Plus, Search, Filter, ArrowUpDown, Calendar } from "lucide-react";
+import { useCompetenceNavigation } from "@/hooks/useCompetenceFilter";
 
 export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [competenceDate, setCompetenceDate] = useState(new Date());
+
+  // Keyboard navigation for competence filter
+  useCompetenceNavigation(
+    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)),
+    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  );
 
   // Criar filtros para as queries
   const filters = useMemo((): TransactionFilters => ({
@@ -79,7 +87,10 @@ export default function Transactions() {
           <div>
             <h1 className="text-2xl font-bold">Transações</h1>
             <p className="text-muted-foreground">
-              Visualize e gerencie todas as suas movimentações financeiras
+              {searchTerm || typeFilter !== "all" || !isCurrentMonth(competenceDate) 
+                ? `Mostrando transações de ${formatDateBR(competenceDate, "MMMM 'de' yyyy").toLowerCase()}`
+                : "Visualize e gerencie todas as suas movimentações financeiras"
+              }
             </p>
           </div>
           <Button onClick={() => setModalOpen(true)}>
@@ -130,12 +141,13 @@ export default function Transactions() {
         )}
 
         {/* Filters */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {/* Competence Filter */}
           <div className="flex justify-center">
             <CompetenceFilter 
               currentDate={competenceDate}
               onDateChange={setCompetenceDate}
+              isLoading={isLoadingTransactions || isLoadingSummary}
             />
           </div>
 
@@ -218,7 +230,7 @@ export default function Transactions() {
                               <span>•</span>
                               <span>{getAccountDisplay(transaction)}</span>
                               <span>•</span>
-                              <span>{new Date(transaction.date).toLocaleDateString('pt-BR')}</span>
+                              <span>{formatDateBR(new Date(transaction.date))}</span>
                             </div>
                           </div>
                         </div>

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { getMonthRange } from "@/lib/date-utils";
 
 export interface Transaction {
   id: string;
@@ -121,14 +122,14 @@ export function useTransactions(filters?: TransactionFilters) {
         query = query.eq('card_id', filters.card_id);
       }
 
-      // Handle competence filter (month/year)
+      // Handle competence filter (month/year) - more efficient date range calculation
       if (filters?.competence_month && filters?.competence_year) {
-        const startDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
-        const endDate = new Date(filters.competence_year, filters.competence_month, 0);
+        const competenceDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
+        const { start, end } = getMonthRange(competenceDate);
         
         query = query
-          .gte('date', startDate.toISOString().split('T')[0])
-          .lte('date', endDate.toISOString().split('T')[0]);
+          .gte('date', start)
+          .lte('date', end);
       } else {
         // Fallback to date_from/date_to if competence not set
         if (filters?.date_from) {
@@ -179,14 +180,14 @@ export function useTransactionsSummary(filters?: Omit<TransactionFilters, 'type'
         baseQuery = baseQuery.eq('card_id', filters.card_id);
       }
 
-      // Handle competence filter (month/year)
+      // Handle competence filter (month/year) - more efficient date range calculation
       if (filters?.competence_month && filters?.competence_year) {
-        const startDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
-        const endDate = new Date(filters.competence_year, filters.competence_month, 0);
+        const competenceDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
+        const { start, end } = getMonthRange(competenceDate);
         
         baseQuery = baseQuery
-          .gte('date', startDate.toISOString().split('T')[0])
-          .lte('date', endDate.toISOString().split('T')[0]);
+          .gte('date', start)
+          .lte('date', end);
       } else {
         // Fallback to date_from/date_to if competence not set
         if (filters?.date_from) {
