@@ -56,13 +56,13 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
   const renderForm = () => {
     switch (selectedType) {
       case 'income':
-        return <IncomeForm onSuccess={handleSuccess} onCancel={handleBack} />;
+        return <IncomeForm key="income" onSuccess={handleSuccess} onCancel={handleBack} />;
       case 'expense':
-        return <ExpenseForm onSuccess={handleSuccess} onCancel={handleBack} />;
+        return <ExpenseForm key="expense" onSuccess={handleSuccess} onCancel={handleBack} />;
       case 'credit_card_expense':
-        return <CreditCardExpenseForm onSuccess={handleSuccess} onCancel={handleBack} />;
+        return <CreditCardExpenseForm key="credit_card_expense" onSuccess={handleSuccess} onCancel={handleBack} />;
       case 'transfer':
-        return <TransferForm onSuccess={handleSuccess} onCancel={handleBack} />;
+        return <TransferForm key="transfer" onSuccess={handleSuccess} onCancel={handleBack} />;
       default:
         return null;
     }
@@ -89,6 +89,7 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
         <DialogContent 
           className="sm:max-w-md max-h-[90vh] overflow-y-auto"
           aria-describedby="transaction-form-description"
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>
             <DialogTitle>{getTitle()}</DialogTitle>

@@ -181,11 +181,14 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
       {/* Conta */}
       <div className="space-y-2">
         <Label>Conta</Label>
-        <Select onValueChange={(value) => form.setValue("account_id", value)}>
+        <Select 
+          value={form.watch("account_id") || ""} 
+          onValueChange={(value) => form.setValue("account_id", value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Selecione a conta" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" sideOffset={4}>
             {accounts?.map((account) => (
               <SelectItem key={account.id} value={account.id}>
                 <div className="flex items-center gap-2">
@@ -207,11 +210,14 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
       {/* Categoria */}
       <div className="space-y-2">
         <Label>Categoria</Label>
-        <Select onValueChange={(value) => form.setValue("category_id", value)}>
+        <Select 
+          value={form.watch("category_id") || ""} 
+          onValueChange={(value) => form.setValue("category_id", value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Selecione a categoria" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" sideOffset={4}>
             {expenseCategories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 <div className="flex items-center gap-2">
@@ -250,11 +256,14 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
       {transactionType === "installment" && (
         <div className="space-y-2">
           <Label htmlFor="installments">Número de Parcelas</Label>
-          <Select onValueChange={(value) => form.setValue("installments", parseInt(value))}>
+          <Select 
+            value={form.watch("installments")?.toString() || ""} 
+            onValueChange={(value) => form.setValue("installments", parseInt(value))}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o número de parcelas" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" sideOffset={4}>
               {Array.from({ length: 60 }, (_, i) => i + 1).map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}x
@@ -307,7 +316,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
             <Calendar
               mode="single"
               selected={form.watch("date")}
@@ -319,7 +328,6 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
               }}
               locale={ptBR}
               initialFocus
-              className="pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
