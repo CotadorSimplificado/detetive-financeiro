@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { TransactionForm } from "./TransactionForm";
 import { transferSchema, TransferFormData } from "@/lib/validations/transaction";
@@ -18,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAccounts } from "@/hooks/useAccounts";
+import { useTransactions } from "@/hooks/useTransactions";
 import { useFormContext } from "react-hook-form";
 
 interface TransferFormProps {
@@ -27,110 +27,37 @@ interface TransferFormProps {
 
 export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
   const queryClient = useQueryClient();
-  const { data: accounts = [] } = useAccounts();
+  const { accounts } = useAccounts();
+  const { createTransaction } = useTransactions();
 
   const createTransfer = useMutation({
     mutationFn: async (data: TransferFormData) => {
-      const { data: user } = await supabase.auth.getUser();
-      
-      if (!user.user) {
-        throw new Error("Usuário não autenticado");
+      // Verificar se as contas existem e têm saldo suficiente
+      const fromAccount = accounts.find(acc => acc.id === data.transfer_from_id);
+      const toAccount = accounts.find(acc => acc.id === data.transfer_to_id);
+
+      if (!fromAccount || !toAccount) {
+        throw new Error("Conta de origem ou destino não encontrada");
       }
 
-      // Verificar se as contas existem e têm saldo suficiente
-      const { data: fromAccount } = await supabase
-        .from('accounts')
-        .select('current_balance')
-        .eq('id', data.transfer_from_id)
-        .single();
-
-      if (!fromAccount || fromAccount.current_balance < data.amount) {
+      if (fromAccount.current_balance < data.amount) {
         throw new Error("Saldo insuficiente na conta de origem");
       }
 
-      // Criar as duas transações (saída e entrada)
-      const { data: transactions, error: transactionError } = await supabase
-        .from('transactions')
-        .insert([
-          {
-            ...data,
-            date: data.date.toISOString().split('T')[0], // Convert Date to string
-            type: 'TRANSFER',
-            user_id: user.user.id,
-            is_transfer: true,
-            account_id: data.transfer_from_id,
-            amount: -data.amount, // Negativo para saída
-            category_id: '', // Transfer doesn't need category but DB requires it
-          },
-          {
-            ...data,
-            date: data.date.toISOString().split('T')[0], // Convert Date to string
-            type: 'TRANSFER',
-            user_id: user.user.id,
-            is_transfer: true,
-            account_id: data.transfer_to_id,
-            amount: data.amount, // Positivo para entrada
-            category_id: '', // Transfer doesn't need category but DB requires it
-          }
-        ])
-        .select();
+      // Criar transação de transferência usando o hook mock
+      const transferTransaction = await createTransaction({
+        type: 'TRANSFER',
+        amount: data.amount,
+        description: data.description,
+        notes: data.notes,
+        date: data.date.toISOString().split('T')[0],
+        is_transfer: true,
+        transfer_from_id: data.transfer_from_id,
+        transfer_to_id: data.transfer_to_id,
+        category_id: 'transfer', // Categoria especial para transferências
+      });
 
-      if (transactionError) {
-        throw transactionError;
-      }
-
-      // Atualizar saldos das contas manualmente
-      const { data: fromAccountBalance, error: fromFetchError } = await supabase
-        .from('accounts')
-        .select('current_balance')
-        .eq('id', data.transfer_from_id)
-        .single();
-
-      if (fromFetchError) {
-        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        throw fromFetchError;
-      }
-
-      const { error: fromUpdateError } = await supabase
-        .from('accounts')
-        .update({ current_balance: fromAccountBalance.current_balance - data.amount })
-        .eq('id', data.transfer_from_id);
-
-      if (fromUpdateError) {
-        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        throw fromUpdateError;
-      }
-
-      const { data: toAccount, error: toFetchError } = await supabase
-        .from('accounts')
-        .select('current_balance')
-        .eq('id', data.transfer_to_id)
-        .single();
-
-      if (toFetchError) {
-        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        // Rollback primeira operação
-        await supabase.from('accounts')
-          .update({ current_balance: fromAccountBalance.current_balance })
-          .eq('id', data.transfer_from_id);
-        throw toFetchError;
-      }
-
-      const { error: toUpdateError } = await supabase
-        .from('accounts')
-        .update({ current_balance: toAccount.current_balance + data.amount })
-        .eq('id', data.transfer_to_id);
-
-      if (toUpdateError) {
-        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        // Rollback primeira operação
-        await supabase.from('accounts')
-          .update({ current_balance: fromAccountBalance.current_balance })
-          .eq('id', data.transfer_from_id);
-        throw toUpdateError;
-      }
-
-      return transactions;
+      return transferTransaction;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
