@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
+import { CompetenceFilter } from "@/components/transactions/CompetenceFilter";
 import { SkeletonList, SkeletonCard } from "@/components/ui/skeleton-card";
 import { InlineLoading } from "@/components/ui/loading";
 import { useTransactions, useTransactionsSummary, type TransactionFilters } from "@/hooks/useTransactions";
@@ -15,12 +16,15 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
+  const [competenceDate, setCompetenceDate] = useState(new Date());
 
   // Criar filtros para as queries
   const filters = useMemo((): TransactionFilters => ({
     type: typeFilter === "all" ? undefined : typeFilter as any,
     search: searchTerm || undefined,
-  }), [searchTerm, typeFilter]);
+    competence_month: competenceDate.getMonth() + 1, // getMonth() returns 0-11
+    competence_year: competenceDate.getFullYear(),
+  }), [searchTerm, typeFilter, competenceDate]);
 
   // Hooks para buscar dados
   const { data: transactions = [], isLoading: isLoadingTransactions, error: transactionsError } = useTransactions(filters);
@@ -126,36 +130,41 @@ export default function Transactions() {
         )}
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar transações..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+        <div className="flex flex-col gap-4">
+          {/* Competence Filter */}
+          <div className="flex justify-center">
+            <CompetenceFilter 
+              currentDate={competenceDate}
+              onDateChange={setCompetenceDate}
             />
           </div>
-          
-          <Select value={typeFilter || "all"} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <SelectValue />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="INCOME">Receitas</SelectItem>
-              <SelectItem value="EXPENSE">Despesas</SelectItem>
-              <SelectItem value="TRANSFER">Transferências</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Calendar className="h-4 w-4 mr-2" />
-            Período
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar transações..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={typeFilter || "all"} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="INCOME">Receitas</SelectItem>
+                <SelectItem value="EXPENSE">Despesas</SelectItem>
+                <SelectItem value="TRANSFER">Transferências</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Transactions List */}

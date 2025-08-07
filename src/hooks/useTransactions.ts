@@ -75,6 +75,8 @@ export interface TransactionFilters {
   date_from?: string;
   date_to?: string;
   search?: string;
+  competence_month?: number; // 1-12
+  competence_year?: number;
 }
 
 export interface TransactionSummary {
@@ -118,13 +120,24 @@ export function useTransactions(filters?: TransactionFilters) {
       if (filters?.card_id) {
         query = query.eq('card_id', filters.card_id);
       }
-      
-      if (filters?.date_from) {
-        query = query.gte('date', filters.date_from);
-      }
-      
-      if (filters?.date_to) {
-        query = query.lte('date', filters.date_to);
+
+      // Handle competence filter (month/year)
+      if (filters?.competence_month && filters?.competence_year) {
+        const startDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
+        const endDate = new Date(filters.competence_year, filters.competence_month, 0);
+        
+        query = query
+          .gte('date', startDate.toISOString().split('T')[0])
+          .lte('date', endDate.toISOString().split('T')[0]);
+      } else {
+        // Fallback to date_from/date_to if competence not set
+        if (filters?.date_from) {
+          query = query.gte('date', filters.date_from);
+        }
+        
+        if (filters?.date_to) {
+          query = query.lte('date', filters.date_to);
+        }
       }
       
       if (filters?.search) {
@@ -165,13 +178,24 @@ export function useTransactionsSummary(filters?: Omit<TransactionFilters, 'type'
       if (filters?.card_id) {
         baseQuery = baseQuery.eq('card_id', filters.card_id);
       }
-      
-      if (filters?.date_from) {
-        baseQuery = baseQuery.gte('date', filters.date_from);
-      }
-      
-      if (filters?.date_to) {
-        baseQuery = baseQuery.lte('date', filters.date_to);
+
+      // Handle competence filter (month/year)
+      if (filters?.competence_month && filters?.competence_year) {
+        const startDate = new Date(filters.competence_year, filters.competence_month - 1, 1);
+        const endDate = new Date(filters.competence_year, filters.competence_month, 0);
+        
+        baseQuery = baseQuery
+          .gte('date', startDate.toISOString().split('T')[0])
+          .lte('date', endDate.toISOString().split('T')[0]);
+      } else {
+        // Fallback to date_from/date_to if competence not set
+        if (filters?.date_from) {
+          baseQuery = baseQuery.gte('date', filters.date_from);
+        }
+        
+        if (filters?.date_to) {
+          baseQuery = baseQuery.lte('date', filters.date_to);
+        }
       }
       
       if (filters?.search) {

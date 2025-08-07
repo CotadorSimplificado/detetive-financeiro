@@ -287,6 +287,225 @@ export type Database = {
           },
         ]
       }
+      documentacao_funcoes: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          examples: string | null
+          function_name: string
+          id: string
+          parameters: string | null
+          performance_notes: string | null
+          permission_levels: string | null
+          related_functions: Json | null
+          return_type: string | null
+          security_notes: string | null
+          status: string | null
+          updated_at: string | null
+          usage_notes: string | null
+          version: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          examples?: string | null
+          function_name: string
+          id?: string
+          parameters?: string | null
+          performance_notes?: string | null
+          permission_levels?: string | null
+          related_functions?: Json | null
+          return_type?: string | null
+          security_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          usage_notes?: string | null
+          version?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          examples?: string | null
+          function_name?: string
+          id?: string
+          parameters?: string | null
+          performance_notes?: string | null
+          permission_levels?: string | null
+          related_functions?: Json | null
+          return_type?: string | null
+          security_notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          usage_notes?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      documentacao_rls: {
+        Row: {
+          anti_redundancy_applied: boolean | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          implementation_notes: string | null
+          performance_impact: string | null
+          permission_matrix: string | null
+          policies_created: Json | null
+          rls_type: string
+          security_functions_used: Json | null
+          status: string | null
+          table_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          anti_redundancy_applied?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          implementation_notes?: string | null
+          performance_impact?: string | null
+          permission_matrix?: string | null
+          policies_created?: Json | null
+          rls_type: string
+          security_functions_used?: Json | null
+          status?: string | null
+          table_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          anti_redundancy_applied?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          implementation_notes?: string | null
+          performance_impact?: string | null
+          permission_matrix?: string | null
+          policies_created?: Json | null
+          rls_type?: string
+          security_functions_used?: Json | null
+          status?: string | null
+          table_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      documentacao_tabelas: {
+        Row: {
+          business_rules: string | null
+          constraints_applied: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          indexes_created: Json | null
+          main_purpose: string | null
+          module: string | null
+          related_tables: Json | null
+          rls_applied: boolean | null
+          rls_type: string | null
+          status: string | null
+          table_name: string
+          table_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_rules?: string | null
+          constraints_applied?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          id?: string
+          indexes_created?: Json | null
+          main_purpose?: string | null
+          module?: string | null
+          related_tables?: Json | null
+          rls_applied?: boolean | null
+          rls_type?: string | null
+          status?: string | null
+          table_name: string
+          table_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_rules?: string | null
+          constraints_applied?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          id?: string
+          indexes_created?: Json | null
+          main_purpose?: string | null
+          module?: string | null
+          related_tables?: Json | null
+          rls_applied?: boolean | null
+          rls_type?: string | null
+          status?: string | null
+          table_name?: string
+          table_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      documentacao_views: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          indexes_created: Json | null
+          module: string | null
+          performance_notes: string | null
+          refresh_strategy: string | null
+          size_info: string | null
+          source_tables: Json | null
+          status: string | null
+          updated_at: string | null
+          usage_purpose: string | null
+          view_name: string
+          view_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          id?: string
+          indexes_created?: Json | null
+          module?: string | null
+          performance_notes?: string | null
+          refresh_strategy?: string | null
+          size_info?: string | null
+          source_tables?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          usage_purpose?: string | null
+          view_name: string
+          view_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          id?: string
+          indexes_created?: Json | null
+          module?: string | null
+          performance_notes?: string | null
+          refresh_strategy?: string | null
+          size_info?: string | null
+          source_tables?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          usage_purpose?: string | null
+          view_name?: string
+          view_type?: string | null
+        }
+        Relationships: []
+      }
       family_group_members: {
         Row: {
           auto_import: boolean | null
@@ -529,10 +748,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_resumo_documentacao: {
+        Row: {
+          data_consulta: string | null
+          funcoes_documentadas: number | null
+          rls_documentadas: number | null
+          tabelas_documentadas: number | null
+          titulo: string | null
+          total_documentos: number | null
+          views_documentadas: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      buscar_documentacao: {
+        Args: { p_termo?: string; p_tipo?: string }
+        Returns: {
+          tipo: string
+          nome: string
+          descricao: string
+          modulo: string
+          status_obj: string
+          criado_em: string
+        }[]
+      }
+      estatisticas_documentacao: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          tipo: string
+          total_objetos: number
+          total_documentado: number
+          percentual_cobertura: number
+          status_emoji: string
+        }[]
+      }
+      verificar_documentacao_pendente: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          tipo: string
+          objeto: string
+          schema_name: string
+          acao_necessaria: string
+        }[]
+      }
     }
     Enums: {
       account_type:
