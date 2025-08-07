@@ -66,6 +66,12 @@ export interface TransactionWithRelations extends Transaction {
     name: string;
     color: string;
   };
+  bill?: {
+    id: string;
+    is_paid: boolean;
+    due_date: string;
+    reference_month: string;
+  } | null;
 }
 
 export interface TransactionFilters {
@@ -99,7 +105,8 @@ export function useTransactions(filters?: TransactionFilters) {
           card:credit_cards(id, name, color, brand),
           category:categories(id, name, color, icon, type),
           transfer_from_account:accounts!transactions_transfer_from_id_fkey(id, name, color),
-          transfer_to_account:accounts!transactions_transfer_to_id_fkey(id, name, color)
+          transfer_to_account:accounts!transactions_transfer_to_id_fkey(id, name, color),
+          bill:credit_card_bills!transactions_bill_id_fkey(id, is_paid, due_date, reference_month)
         `)
         .is('deleted_at', null)
         .order('date', { ascending: false })

@@ -210,6 +210,56 @@ export type Database = {
           },
         ]
       }
+      credit_card_bills: {
+        Row: {
+          card_id: string
+          closing_date: string
+          created_at: string
+          due_date: string
+          id: string
+          is_paid: boolean
+          paid_at: string | null
+          payment_transaction_id: string | null
+          reference_month: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          card_id: string
+          closing_date: string
+          created_at?: string
+          due_date: string
+          id?: string
+          is_paid?: boolean
+          paid_at?: string | null
+          payment_transaction_id?: string | null
+          reference_month: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          card_id?: string
+          closing_date?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          is_paid?: boolean
+          paid_at?: string | null
+          payment_transaction_id?: string | null
+          reference_month?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_card_bills_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "credit_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_cards: {
         Row: {
           available_limit: number | null
@@ -613,6 +663,7 @@ export type Database = {
           ai_categorized: boolean | null
           ai_confidence: number | null
           amount: number
+          bill_id: string | null
           card_id: string | null
           category_id: string
           created_at: string | null
@@ -645,6 +696,7 @@ export type Database = {
           ai_categorized?: boolean | null
           ai_confidence?: number | null
           amount: number
+          bill_id?: string | null
           card_id?: string | null
           category_id: string
           created_at?: string | null
@@ -679,6 +731,7 @@ export type Database = {
           ai_categorized?: boolean | null
           ai_confidence?: number | null
           amount?: number
+          bill_id?: string | null
           card_id?: string | null
           category_id?: string
           created_at?: string | null
@@ -714,6 +767,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "credit_card_bills"
             referencedColumns: ["id"]
           },
           {

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
+import { CreditCardBillItem } from "@/components/transactions/CreditCardBillItem";
 import { CompetenceFilter } from "@/components/transactions/CompetenceFilter";
 import { SkeletonList, SkeletonCard } from "@/components/ui/skeleton-card";
 import { InlineLoading } from "@/components/ui/loading";
 import { useTransactions, useTransactionsSummary, type TransactionFilters } from "@/hooks/useTransactions";
+import { useCreditCardBills } from "@/hooks/useCreditCardBills";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { formatDateBR, isCurrentMonth } from "@/lib/date-utils";
@@ -40,6 +42,7 @@ export default function Transactions() {
   const { data: summary, isLoading: isLoadingSummary } = useTransactionsSummary(filters);
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
+  const { data: creditCardBills = [] } = useCreditCardBills();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -94,7 +97,7 @@ export default function Transactions() {
               }
             </p>
           </div>
-          <Button onClick={() => setModalOpen(true)}>
+          <Button onClick={() => setTransactionModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Transação
           </Button>
@@ -206,6 +209,14 @@ export default function Transactions() {
             </div>
           ) : (
             <div className="divide-y">
+              {/* Credit card bills */}
+              {creditCardBills.filter(bill => !bill.is_paid).map((bill) => (
+                <div key={bill.id} className="p-4 hover:bg-muted/50 transition-colors">
+                  <CreditCardBillItem bill={bill} />
+                </div>
+              ))}
+              
+              {/* Regular transactions */}
               {transactions.length > 0 ? (
                 transactions.map((transaction) => (
                   <div key={transaction.id} className="p-4 hover:bg-muted/50 transition-colors">
@@ -249,7 +260,7 @@ export default function Transactions() {
                     </div>
                   </div>
                 ))
-              ) : (
+              ) : creditCardBills.filter(bill => !bill.is_paid).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <Plus className="h-8 w-8 text-muted-foreground" />
@@ -264,13 +275,13 @@ export default function Transactions() {
                     }
                   </p>
                   {!searchTerm && typeFilter === "all" && (
-                    <Button onClick={() => setModalOpen(true)}>
+                    <Button onClick={() => setTransactionModalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Criar Primeira Transação
                     </Button>
-                  )}
+                   )}
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
