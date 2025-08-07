@@ -9,9 +9,10 @@ interface MainLayoutProps {
   children: React.ReactNode;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  onNewTransaction?: () => void;
 }
 
-export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps) => {
+export const MainLayout = ({ children, activeTab, onTabChange, onNewTransaction }: MainLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
@@ -53,7 +54,8 @@ export const MainLayout = ({ children, activeTab, onTabChange }: MainLayoutProps
           onTabChange={(tab) => {
             onTabChange?.(tab);
             setSidebarOpen(false);
-          }} 
+          }}
+          onNewTransaction={onNewTransaction}
         />
       </aside>
 

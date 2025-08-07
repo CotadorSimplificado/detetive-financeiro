@@ -13,6 +13,7 @@ import { CreditCardModal } from "@/components/cards/CreditCardModal";
 import { CreditCardFormData } from "@/lib/validations/credit-card";
 import { formatCurrency } from "@/lib/currency-utils";
 import { useNavigate } from "react-router-dom";
+import { TransactionModal } from "@/components/transactions/TransactionModal";
 
 export default function Cards() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Cards() {
   const [filterType, setFilterType] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<any>(null);
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
   const { data: cards = [], isLoading } = useCreditCards();
   const createCard = useCreateCreditCard();
@@ -89,8 +91,9 @@ export default function Cards() {
   };
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
+    <>
+      <MainLayout onNewTransaction={() => setTransactionModalOpen(true)}>
+        <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -258,7 +261,14 @@ export default function Cards() {
           editingCard={editingCard}
           availableParentCards={cards}
         />
-      </div>
-    </MainLayout>
+        
+        {/* Transaction Modal */}
+        <TransactionModal 
+          open={transactionModalOpen}
+          onOpenChange={setTransactionModalOpen}
+        />
+        </div>
+      </MainLayout>
+    </>
   );
 }

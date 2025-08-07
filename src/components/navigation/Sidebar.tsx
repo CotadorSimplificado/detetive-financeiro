@@ -22,6 +22,7 @@ interface SidebarProps {
   className?: string;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  onNewTransaction?: () => void;
 }
 
 const navigationItems = [
@@ -75,28 +76,7 @@ const navigationItems = [
   }
 ];
 
-const quickActions = [
-  {
-    id: "new-expense",
-    label: "Nova Despesa",
-    icon: Receipt,
-    color: "text-expense"
-  },
-  {
-    id: "new-income",
-    label: "Nova Receita", 
-    icon: Plus,
-    color: "text-income"
-  },
-  {
-    id: "transfer",
-    label: "Transferência",
-    icon: ArrowLeftRight,
-    color: "text-transfer"
-  }
-];
-
-export const Sidebar = ({ className, activeTab = "dashboard", onTabChange }: SidebarProps) => {
+export const Sidebar = ({ className, activeTab = "dashboard", onTabChange, onNewTransaction }: SidebarProps) => {
   const { isTransitioning, navigateWithTransition } = usePageTransition();
 
   return (
@@ -123,20 +103,13 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange }: Sid
               <h3 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Ações Rápidas
               </h3>
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={action.id}
-                    variant="ghost"
-                    className="w-full justify-start h-9 text-sm"
-                    onClick={() => onTabChange?.(action.id)}
-                  >
-                    <Icon className={cn("mr-2 h-4 w-4", action.color)} />
-                    {action.label}
-                  </Button>
-                );
-              })}
+              <Button
+                className="w-full justify-start h-10 bg-gradient-primary hover:opacity-90 text-white"
+                onClick={() => onNewTransaction?.()}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Lançamento
+              </Button>
             </div>
           </div>
 
