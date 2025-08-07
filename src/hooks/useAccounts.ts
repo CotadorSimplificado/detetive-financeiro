@@ -1,7 +1,15 @@
 // Compatibilidade: Re-exporta o hook mock de contas
 import { useMockAccounts } from '@/data/hooks/useMockAccounts';
 
-export const useAccounts = useMockAccounts;
+export const useAccounts = () => {
+  const mockResult = useMockAccounts();
+  return {
+    data: mockResult.accounts,
+    loading: mockResult.loading,
+    error: mockResult.error,
+    ...mockResult
+  };
+};
 
 // Hooks individuais para compatibilidade
 export const useCreateAccount = () => {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { mockStore, MockUser, MockSession } from './mockStore';
+import { mockStore } from './mockStore';
+import { MockUser, MockSession } from '../types';
 import {
   Account,
   Category,
@@ -431,6 +432,46 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
       savePersistedState();
     }
   }, [state.accounts, state.categories, state.transactions, state.creditCards, state.creditCardBills, state.budgets]);
+
+  // ===== CARREGAMENTO AUTOMÁTICO DE DADOS =====
+  
+  // Carregar dados automaticamente após login bem-sucedido
+  useEffect(() => {
+    const loadInitialData = async () => {
+      if (state.isAuthenticated && state.user) {
+        // Só carregar se não houver dados persistidos
+        const hasPersistedData = state.accounts.length > 0 || state.categories.length > 0;
+        
+        if (!hasPersistedData) {
+          console.log('Carregando dados iniciais após login...');
+          try {
+            // Primeiro carregar categorias (sempre disponíveis)
+            await fetchCategories();
+            
+            // Carregar contas do usuário
+            await fetchAccounts();
+            
+            // Se o usuário não tiver contas, criar contas padrão
+            const userAccounts = await mockStore.getAccounts(state.user.id);
+            if (userAccounts.length === 0) {
+              console.log('Criando contas padrão para novo usuário...');
+              await createDefaultAccountsForUser(state.user.id);
+              await fetchAccounts(); // Recarregar após criar
+            }
+            
+            await Promise.all([
+              fetchCreditCards(),
+              fetchTransactions()
+            ]);
+          } catch (error) {
+            console.error('Erro ao carregar dados iniciais:', error);
+          }
+        }
+      }
+    };
+
+    loadInitialData();
+  }, [state.isAuthenticated, state.user]);
 
   // ===== AUTENTICAÇÃO =====
 
@@ -950,6 +991,67 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
   };
 
   // ===== UTILITÁRIOS =====
+
+  const createDefaultAccountsForUser = async (userId: string) => {
+    try {
+      // Criar conta principal padrão
+      await createAccount({
+        user_id: userId,
+        name: 'Conta Principal',
+        type: 'CHECKING',
+        bank_name: 'Banco do Brasil',
+        bank_code: '001',
+        agency_number: '1234',
+        account_number: '12345-6',
+        current_balance: 5000.00,
+        initial_balance: 5000.00,
+        color: '#3B82F6',
+        icon: '🏦',
+        is_active: true,
+        is_default: true,
+        include_in_total: true,
+        sync_enabled: false
+      });
+
+      // Criar conta poupança
+      await createAccount({
+        user_id: userId,
+        name: 'Conta Poupança',
+        type: 'SAVINGS',
+        bank_name: 'Banco do Brasil',
+        bank_code: '001',
+        agency_number: '1234',
+        account_number: '65432-1',
+        current_balance: 15000.00,
+        initial_balance: 10000.00,
+        color: '#10B981',
+        icon: '💰',
+        is_active: true,
+        is_default: false,
+        include_in_total: true,
+        sync_enabled: false
+      });
+
+      // Criar carteira
+      await createAccount({
+        user_id: userId,
+        name: 'Carteira',
+        type: 'CASH',
+        current_balance: 500.00,
+        initial_balance: 500.00,
+        color: '#F59E0B',
+        icon: '💵',
+        is_active: true,
+        is_default: false,
+        include_in_total: true,
+        sync_enabled: false
+      });
+
+      console.log('Contas padrão criadas com sucesso para o usuário:', userId);
+    } catch (error) {
+      console.error('Erro ao criar contas padrão:', error);
+    }
+  };
 
   const reset = () => {
     mockStore.reset();
