@@ -32,10 +32,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { CreditCardBill, usePayCreditCardBill } from "@/hooks/useCreditCardBills";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAccounts } from "@/hooks/useAccounts";
 
 const payBillSchema = z.object({
-  account_id: z.string().uuid("Conta é obrigatória"),
+  account_id: z.string().min(1, "Conta é obrigatória"),
   paid_date: z.date(),
 });
 
@@ -49,7 +50,19 @@ interface PayBillModalProps {
 
 export function PayBillModal({ bill, open, onOpenChange }: PayBillModalProps) {
   const { data: accounts } = useAccounts();
-  const payBillMutation = usePayCreditCardBill();
+  const markBillAsPaid = usePayCreditCardBill();
+  const queryClient = useQueryClient();
+
+  const payBillMutation = useMutation({
+    mutationFn: async (vars: { billId: string; accountId: string; paidAt: Date }) => {
+      // No mock atual, apenas marcamos como paga; poderia registrar transação aqui se necessário
+      return await markBillAsPaid(vars.billId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["creditCardBills"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    }
+  });
 
   const form = useForm<PayBillFormData>({
     resolver: zodResolver(payBillSchema),
@@ -90,7 +103,7 @@ export function PayBillModal({ bill, open, onOpenChange }: PayBillModalProps) {
           <div className="p-4 bg-muted rounded-lg">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-medium">{bill.credit_cards?.name}</h3>
+                <h3 className="font-medium">Fatura</h3>
                 <p className="text-sm text-muted-foreground">
                   Fatura {bill.reference_month}
                 </p>
