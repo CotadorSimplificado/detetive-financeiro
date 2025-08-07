@@ -20,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
+import { useCreditCards } from "@/hooks/useCreditCards";
 import { useFormContext } from "react-hook-form";
 
 interface ExpenseFormProps {
@@ -31,6 +32,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
   const queryClient = useQueryClient();
   const { data: accounts = [] } = useAccounts();
   const { data: expenseCategories = [] } = useCategories('EXPENSE');
+  const { data: creditCards = [] } = useCreditCards();
 
   const createExpense = useMutation({
     mutationFn: async (data: ExpenseFormData) => {
@@ -171,13 +173,32 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
                         <SelectValue placeholder="Selecione um cartão" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="no-cards">
-                        <span className="text-muted-foreground">
-                          Nenhum cartão cadastrado
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
+                     <SelectContent>
+                       {creditCards.length === 0 ? (
+                         <SelectItem value="no-cards" disabled>
+                           <span className="text-muted-foreground">
+                             Nenhum cartão cadastrado
+                           </span>
+                         </SelectItem>
+                       ) : (
+                         creditCards.map((card) => (
+                           <SelectItem key={card.id} value={card.id}>
+                             <div className="flex items-center gap-2">
+                               <div 
+                                 className="w-3 h-3 rounded"
+                                 style={{ backgroundColor: card.color }}
+                               />
+                               <span>{card.name}</span>
+                               {card.last_digits && (
+                                 <span className="text-muted-foreground text-sm">
+                                   ••{card.last_digits}
+                                 </span>
+                               )}
+                             </div>
+                           </SelectItem>
+                         ))
+                       )}
+                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
