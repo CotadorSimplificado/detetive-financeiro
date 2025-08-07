@@ -151,7 +151,13 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange }: Sid
                       "w-full justify-start h-10 text-sm mb-1",
                       isActive && "bg-primary/10 text-primary border-r-2 border-r-primary"
                     )}
-                    onClick={() => onTabChange?.(item.id)}
+                    onClick={() => {
+                      if (item.href) {
+                        window.location.href = item.href;
+                      } else {
+                        onTabChange?.(item.id);
+                      }
+                    }}
                   >
                     <Icon className="mr-3 h-4 w-4" />
                     {item.label}
