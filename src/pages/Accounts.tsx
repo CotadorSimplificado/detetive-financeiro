@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AccountCard } from "@/components/accounts/AccountCard";
 import { AccountModal } from "@/components/accounts/AccountModal";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { useAccounts, type Account } from "@/hooks/useAccounts";
 import { Plus, Search, Filter } from "lucide-react";
 import { accountTypeOptions } from "@/lib/validations/account";
@@ -18,17 +19,22 @@ export default function Accounts() {
 
   const { data: accounts = [], isLoading, error } = useAccounts();
 
-  const filteredAccounts = accounts.filter((account) => {
-    const matchesSearch = account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         account.bank_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "all" || account.type === typeFilter;
-    
-    return matchesSearch && matchesType;
-  });
+  // Memoiza os cálculos pesados
+  const { filteredAccounts, totalBalance } = useMemo(() => {
+    const filtered = accounts.filter((account) => {
+      const matchesSearch = account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           account.bank_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = typeFilter === "all" || account.type === typeFilter;
+      
+      return matchesSearch && matchesType;
+    });
 
-  const totalBalance = accounts
-    .filter(account => account.include_in_total)
-    .reduce((sum, account) => sum + account.current_balance, 0);
+    const total = accounts
+      .filter(account => account.include_in_total)
+      .reduce((sum, account) => sum + account.current_balance, 0);
+
+    return { filteredAccounts: filtered, totalBalance: total };
+  }, [accounts, searchTerm, typeFilter]);
 
   const handleCreateAccount = () => {
     setSelectedAccount(null);
@@ -125,8 +131,8 @@ export default function Accounts() {
         {/* Accounts Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
             ))}
           </div>
         ) : filteredAccounts.length > 0 ? (

@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useCategories, suggestCategoryByDescription } from "@/hooks/useCategories";
+import { useCurrencyInput } from "@/hooks/useCurrencyInput";
 
 interface BaseTransactionFormProps {
   onSubmit: (data: any) => void;
@@ -74,11 +75,23 @@ export function TransactionForm({
     }
   }, [description, categories, form]);
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d,]/g, '');
-    const numericValue = parseFloat(value.replace(',', '.')) || 0;
-    form.setValue("amount", numericValue);
-  };
+  // Hook para input de moeda melhorado
+  const currencyInput = useCurrencyInput({
+    initialValue: defaultValues?.amount || 0,
+    maxValue: 999999999.99,
+    onChange: (value) => {
+      form.setValue("amount", value, { shouldValidate: true });
+    },
+  });
+
+  // Sincroniza o valor inicial
+  useEffect(() => {
+    if (defaultValues?.amount && defaultValues.amount !== currencyInput.numericValue) {
+      currencyInput.setValue(defaultValues.amount);
+    }
+  }, [defaultValues?.amount]);
+
+  // Remove a função handleAmountChange antiga pois agora usamos o hook
 
   return (
     <Form {...form}>
@@ -113,9 +126,19 @@ export function TransactionForm({
                   </span>
                   <Input 
                     placeholder="0,00"
-                    className="pl-10"
-                    onChange={handleAmountChange}
-                    value={field.value ? field.value.toFixed(2).replace('.', ',') : ''}
+                    className={cn(
+                      "pl-10",
+                      !currencyInput.isValid && currencyInput.displayValue && "border-destructive"
+                    )}
+                    value={currencyInput.displayValue}
+                    onChange={currencyInput.handleChange}
+                    onFocus={currencyInput.handleFocus}
+                    onBlur={() => {
+                      currencyInput.handleBlur();
+                      field.onBlur();
+                    }}
+                    inputMode="numeric"
+                    autoComplete="off"
                   />
                 </div>
               </FormControl>
