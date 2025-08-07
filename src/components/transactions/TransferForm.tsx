@@ -54,19 +54,23 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
         .insert([
           {
             ...data,
+            date: data.date.toISOString().split('T')[0], // Convert Date to string
             type: 'TRANSFER',
             user_id: user.user.id,
             is_transfer: true,
             account_id: data.transfer_from_id,
             amount: -data.amount, // Negativo para saída
+            category_id: '', // Transfer doesn't need category but DB requires it
           },
           {
             ...data,
+            date: data.date.toISOString().split('T')[0], // Convert Date to string
             type: 'TRANSFER',
             user_id: user.user.id,
             is_transfer: true,
             account_id: data.transfer_to_id,
             amount: data.amount, // Positivo para entrada
+            category_id: '', // Transfer doesn't need category but DB requires it
           }
         ])
         .select();
@@ -75,31 +79,55 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
         throw transactionError;
       }
 
-      // Atualizar saldos das contas
-      const { error: fromAccountError } = await supabase.rpc('update_account_balance', {
-        account_id: data.transfer_from_id,
-        amount_change: -data.amount
-      });
+      // Atualizar saldos das contas manualmente
+      const { data: fromAccountBalance, error: fromFetchError } = await supabase
+        .from('accounts')
+        .select('current_balance')
+        .eq('id', data.transfer_from_id)
+        .single();
 
-      if (fromAccountError) {
-        // Rollback em caso de erro
+      if (fromFetchError) {
         await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        throw fromAccountError;
+        throw fromFetchError;
       }
 
-      const { error: toAccountError } = await supabase.rpc('update_account_balance', {
-        account_id: data.transfer_to_id,
-        amount_change: data.amount
-      });
+      const { error: fromUpdateError } = await supabase
+        .from('accounts')
+        .update({ current_balance: fromAccountBalance.current_balance - data.amount })
+        .eq('id', data.transfer_from_id);
 
-      if (toAccountError) {
-        // Rollback em caso de erro
+      if (fromUpdateError) {
         await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
-        await supabase.rpc('update_account_balance', {
-          account_id: data.transfer_from_id,
-          amount_change: data.amount // Reverter alteração anterior
-        });
-        throw toAccountError;
+        throw fromUpdateError;
+      }
+
+      const { data: toAccount, error: toFetchError } = await supabase
+        .from('accounts')
+        .select('current_balance')
+        .eq('id', data.transfer_to_id)
+        .single();
+
+      if (toFetchError) {
+        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
+        // Rollback primeira operação
+        await supabase.from('accounts')
+          .update({ current_balance: fromAccountBalance.current_balance })
+          .eq('id', data.transfer_from_id);
+        throw toFetchError;
+      }
+
+      const { error: toUpdateError } = await supabase
+        .from('accounts')
+        .update({ current_balance: toAccount.current_balance + data.amount })
+        .eq('id', data.transfer_to_id);
+
+      if (toUpdateError) {
+        await supabase.from('transactions').delete().in('id', transactions.map(t => t.id));
+        // Rollback primeira operação
+        await supabase.from('accounts')
+          .update({ current_balance: fromAccountBalance.current_balance })
+          .eq('id', data.transfer_from_id);
+        throw toUpdateError;
       }
 
       return transactions;

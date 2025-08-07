@@ -66,7 +66,11 @@ export function useCreateCategory() {
     mutationFn: async (category: Omit<Category, 'id' | 'user_id'>) => {
       const { data, error } = await supabase
         .from('categories')
-        .insert([{ ...category, user_id: (await supabase.auth.getUser()).data.user?.id }])
+        .insert([{ 
+          ...category, 
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          slug: category.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+        }])
         .select()
         .single();
 

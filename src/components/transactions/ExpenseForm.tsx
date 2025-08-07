@@ -45,6 +45,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
         .from('transactions')
         .insert([{
           ...data,
+          date: data.date.toISOString().split('T')[0], // Convert Date to string
           type: 'EXPENSE',
           user_id: user.user.id,
           is_transfer: false,
@@ -56,17 +57,27 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
         throw transactionError;
       }
 
-      // Atualizar saldo da conta (se não for cartão de crédito)
+      // Atualizar saldo da conta manualmente (se não for cartão de crédito)
       if (data.account_id) {
-        const { error: accountError } = await supabase.rpc('update_account_balance', {
-          account_id: data.account_id,
-          amount_change: -data.amount // Negativo para despesa
-        });
+        const { data: account, error: fetchError } = await supabase
+          .from('accounts')
+          .select('current_balance')
+          .eq('id', data.account_id)
+          .single();
 
-        if (accountError) {
-          // Se falhar ao atualizar saldo, tentar rollback da transação
+        if (fetchError) {
           await supabase.from('transactions').delete().eq('id', transaction.id);
-          throw accountError;
+          throw fetchError;
+        }
+
+        const { error: updateError } = await supabase
+          .from('accounts')
+          .update({ current_balance: account.current_balance - data.amount })
+          .eq('id', data.account_id);
+
+        if (updateError) {
+          await supabase.from('transactions').delete().eq('id', transaction.id);
+          throw updateError;
         }
       }
 
