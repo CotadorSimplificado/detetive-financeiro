@@ -52,6 +52,32 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				
+				// Financial Theme Colors
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
+				
+				// Chart Colors
+				chart: {
+					orange: 'hsl(var(--chart-orange))',
+					blue: 'hsl(var(--chart-blue))',
+					green: 'hsl(var(--chart-green))',
+					red: 'hsl(var(--chart-red))',
+					purple: 'hsl(var(--chart-purple))',
+					cyan: 'hsl(var(--chart-cyan))'
+				},
+				
+				// Financial Specific
+				income: 'hsl(var(--income))',
+				expense: 'hsl(var(--expense))',
+				transfer: 'hsl(var(--transfer))',
+				
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +88,12 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-success': 'var(--gradient-success)',
+				'gradient-warning': 'var(--gradient-warning)',
+				'gradient-card': 'var(--gradient-card)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
