@@ -245,6 +245,107 @@ console.log('Sessão atual:', mockStore.getCurrentSession());
 console.log('Autenticado:', mockStore.isAuthenticated());
 ```
 
+## 🎯 Context API
+
+### Visão Geral
+
+O sistema inclui um Context API completo que fornece:
+
+- **Gerenciamento de estado global** para todos os dados mock
+- **Persistência automática** no localStorage
+- **Hooks customizados** para cada entidade
+- **Reatividade** com React
+- **CRUD operations** completas
+
+### Estrutura do Context
+
+```
+MockProvider (Context Provider)
+├── useMockStore (Hook principal)
+├── useMockAuth (Autenticação)
+├── useMockAccounts (Contas)
+├── useMockCategories (Categorias)
+├── useMockTransactions (Transações)
+├── useMockCreditCards (Cartões)
+└── useMockBills (Faturas)
+```
+
+### Persistência de Estado
+
+O Context API automaticamente:
+
+- **Salva** o estado no localStorage quando há mudanças
+- **Recupera** o estado do localStorage na inicialização
+- **Sincroniza** dados entre abas do navegador
+- **Limpa** dados expirados automaticamente
+
+### Exemplo de Uso Completo
+
+```typescript
+// App.tsx
+import { MockProvider } from '@/data';
+
+function App() {
+  return (
+    <MockProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/accounts" element={<Accounts />} />
+          <Route path="/transactions" element={<Transactions />} />
+        </Routes>
+      </Router>
+    </MockProvider>
+  );
+}
+
+// Dashboard.tsx
+import { useMockAuth, useMockAccounts, useMockTransactions } from '@/data';
+
+function Dashboard() {
+  const { user, isAuthenticated } = useMockAuth();
+  const { accounts, totalBalance, fetchAccounts } = useMockAccounts();
+  const { transactions, totalIncome, totalExpenses, fetchTransactions } = useMockTransactions();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAccounts();
+      fetchTransactions();
+    }
+  }, [isAuthenticated, fetchAccounts, fetchTransactions]);
+
+  if (!isAuthenticated) {
+    return <div>Faça login para continuar</div>;
+  }
+
+  return (
+    <div>
+      <h1>Bem-vindo, {user?.full_name}!</h1>
+      <div>
+        <h2>Resumo Financeiro</h2>
+        <p>Saldo Total: R$ {totalBalance.toFixed(2)}</p>
+        <p>Receitas: R$ {totalIncome.toFixed(2)}</p>
+        <p>Despesas: R$ {totalExpenses.toFixed(2)}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+### Testes
+
+Para testar o Context API:
+
+```typescript
+// No console do navegador
+import('./src/data/test-context.ts').then(module => {
+  module.testContextAPI();           // Teste completo
+  module.testContextPersistence();   // Teste de persistência
+  module.showContextInfo();          // Informações do Context
+  module.cleanupContext();           // Limpar dados
+});
+```
+
 ## 📝 Notas Importantes
 
 1. **Senhas**: Para usuários pré-cadastrados, qualquer senha é aceita
@@ -252,9 +353,13 @@ console.log('Autenticado:', mockStore.isAuthenticated());
 3. **Expiração**: Sessões expiram em 24 horas
 4. **Limpeza**: Sessões expiradas são automaticamente removidas
 5. **Segurança**: Este é um sistema de desenvolvimento, não para produção
+6. **Context API**: Use o MockProvider para gerenciamento de estado reativo
 
 ## 🔮 Próximos Passos
 
+- [x] Implementar Context API com hooks customizados
+- [x] Adicionar persistência de estado no localStorage
+- [x] Criar hooks para cada entidade (accounts, categories, transactions, etc.)
 - [ ] Implementar validação de senhas mais robusta
 - [ ] Adicionar mais cenários de teste
 - [ ] Implementar sincronização entre abas

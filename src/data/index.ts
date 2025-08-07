@@ -6,6 +6,12 @@ export * from './types';
 // Store principal
 export { default as mockStore, MockStore } from './store/mockStore';
 
+// Context API e Provider
+export { MockProvider, useMockStore } from './store/mockContext';
+
+// Hooks customizados
+export * from './hooks';
+
 // Dados mock (para referência e testes)
 export { mockUsers, defaultUser } from './mock/users';
 export { mockAccounts } from './mock/accounts';
