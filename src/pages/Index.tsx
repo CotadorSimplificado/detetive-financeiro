@@ -98,7 +98,7 @@ const Index = () => {
 
   return (
     <>
-      <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
+      <MainLayout activeTab={activeTab} onTabChange={setActiveTab} onNewTransaction={() => setTransactionModalOpen(true)}>
         {renderContent()}
       </MainLayout>
       

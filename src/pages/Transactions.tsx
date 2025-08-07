@@ -18,6 +18,7 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [competenceDate, setCompetenceDate] = useState(new Date());
 
   // Keyboard navigation for competence filter
@@ -80,7 +81,7 @@ export default function Transactions() {
   };
 
   return (
-    <MainLayout activeTab="transactions">
+    <MainLayout activeTab="transactions" onNewTransaction={() => setTransactionModalOpen(true)}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -276,8 +277,8 @@ export default function Transactions() {
 
         {/* Transaction Modal */}
         <TransactionModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
+          open={transactionModalOpen}
+          onOpenChange={setTransactionModalOpen}
         />
       </div>
     </MainLayout>
