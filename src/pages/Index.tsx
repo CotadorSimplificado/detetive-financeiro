@@ -3,9 +3,11 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { DashboardCards } from "@/components/dashboard/DashboardCards";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { TransactionModal } from "@/components/transactions/TransactionModal";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -19,7 +21,10 @@ const Index = () => {
                   Visão geral das suas finanças pessoais
                 </p>
               </div>
-              <Button className="bg-gradient-primary hover:opacity-90">
+              <Button 
+                className="bg-gradient-primary hover:opacity-90"
+                onClick={() => setTransactionModalOpen(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Transação
               </Button>
@@ -92,9 +97,16 @@ const Index = () => {
   };
 
   return (
-    <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      {renderContent()}
-    </MainLayout>
+    <>
+      <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
+        {renderContent()}
+      </MainLayout>
+      
+      <TransactionModal 
+        open={transactionModalOpen}
+        onOpenChange={setTransactionModalOpen}
+      />
+    </>
   );
 };
 
