@@ -40,25 +40,37 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
   const [showCalendar, setShowCalendar] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
-  const createTransactionMutation = useCreateTransaction();
-  
+  const createTransaction = useCreateTransaction();
+
+  const form = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      description: "",
+      amount: 0,
+      date: new Date(),
+      notes: "",
+      category_id: "",
+      account_id: "",
+      transaction_type: "single",
+      installments: 1,
+      status: "completed",
+    },
+  });
+
+  // Hook para input de moeda com integração ao formulário
   const {
     numericValue: amountValue,
     displayValue: amountDisplay,
     setValue: setAmountValue,
     handleChange: onAmountChange,
-  } = useCurrencyInput();
-
-  const form = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema),
-    defaultValues: {
-      date: new Date(),
-      transaction_type: "single",
-      installments: 1,
-      status: "completed",
+  } = useCurrencyInput({
+    initialValue: 0,
+    onChange: (value) => {
+      form.setValue("amount", value, { shouldValidate: true });
     },
   });
 
@@ -66,6 +78,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
   const expenseCategories = categories?.filter(cat => cat.type === 'EXPENSE') || [];
 
   const handleSubmit = async (data: ExpenseFormData) => {
+    setIsLoading(true);
     try {
       if (data.transaction_type === "installment" && data.installments) {
         // Criar transações parceladas
@@ -93,9 +106,10 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
             recurrence_type: 'NONE' as const,
             ai_categorized: false,
             paid_at: data.status === "completed" ? new Date().toISOString() : undefined,
+            user_id: '', // Será preenchido automaticamente pelo mockContext
           };
           
-          await createTransactionMutation.mutateAsync(transactionData);
+          await createTransaction(transactionData);
         }
       } else {
         // Criar transação única
@@ -113,14 +127,17 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
           recurrence_type: 'NONE' as const,
           ai_categorized: false,
           paid_at: data.status === "completed" ? new Date().toISOString() : undefined,
+          user_id: '', // Será preenchido automaticamente pelo mockContext
         };
         
-        await createTransactionMutation.mutateAsync(transactionData);
+        await createTransaction(transactionData);
       }
       
       onSuccess();
     } catch (error) {
       console.error('Error creating expense:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -328,10 +345,10 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
         </Button>
         <Button 
           type="submit" 
-          disabled={createTransactionMutation.isPending || !amountValue}
+          disabled={isLoading || !amountValue}
           className="flex-1"
         >
-          {createTransactionMutation.isPending ? "Criando..." : "Criar Despesa"}
+          {isLoading ? "Criando..." : "Criar Despesa"}
         </Button>
       </div>
     </form>
