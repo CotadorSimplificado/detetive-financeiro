@@ -73,7 +73,6 @@ export const useTransactionsSummary = (filters?: any) => {
 
 export type { 
   Transaction, 
-  TransactionWithRelations,
   TransactionFilters,
   CreateTransaction,
   UpdateTransaction 
