@@ -28,8 +28,8 @@ const defaultFlags: FeatureFlags = {
   useRealTransactions: true,
   useRealCreditCards: true,
   
-  // Fase 3: Auth e features avançadas
-  useRealAuth: false,
+  // Fase 4: Auth e features avançadas
+  useRealAuth: true,
   useRealBudgets: false,
   useRealReports: false,
   
