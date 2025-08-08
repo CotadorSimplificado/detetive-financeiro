@@ -34,5 +34,6 @@ export const creditCardSchema = z.object({
 }, {
   message: "Para cartões de crédito, limite, dia de fechamento e vencimento são obrigatórios",
   path: ["credit_limit"]
+});
 
 export type CreditCardFormData = z.infer<typeof creditCardSchema>;
