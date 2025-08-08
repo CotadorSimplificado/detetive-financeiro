@@ -34,7 +34,7 @@ export default function Budgets() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { currentCompetence } = useCompetenceFilter();
+  const { currentCompetence, setCompetenceDate } = useCompetenceFilter();
   const { 
     currentPlan, 
     previousPlan, 
@@ -115,7 +115,10 @@ export default function Budgets() {
             </p>
           </div>
           <div className="flex gap-2">
-            <CompetenceFilter />
+            <CompetenceFilter 
+              currentDate={currentCompetence.date}
+              onDateChange={setCompetenceDate}
+            />
           </div>
         </div>
 
