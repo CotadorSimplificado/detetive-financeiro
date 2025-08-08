@@ -4,11 +4,81 @@
 
 Detetive Financeiro is a comprehensive personal finance management application built with React, TypeScript, and Express. The app provides users with tools to track accounts, transactions, credit cards, and credit card bills. It features a modern dashboard with charts and visualizations, transaction management with support for income, expenses, transfers, and credit card transactions, and account management with different account types (checking, savings, investment, cash).
 
-The application uses a mock data system for development and demonstration purposes, with a well-structured data layer that can easily be replaced with real backend integration. The UI is built with shadcn/ui components and Tailwind CSS, providing a polished dark-themed financial interface.
+The application is currently using a mock data system for development but has PostgreSQL database configured and ready for migration. The UI is built with shadcn/ui components and Tailwind CSS, providing a polished dark-themed financial interface.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Updates (January 2025)
+
+### Fixed Competence Filter State Management
+- **Issue**: useCompetenceFilter hook was returning empty object causing "Cannot read properties of undefined (reading 'month')" errors
+- **Solution**: Implemented complete state management in useCompetenceFilter hook with month, year, and date properties
+- **Impact**: Fixed monthly planning features across Dashboard, Transactions, and Budgets pages
+
+### Database Configuration
+- **Added**: PostgreSQL database connection configured with environment variables
+- **Status**: Database ready for migration from mock data system
+
+## Pending Implementation
+
+### Authentication System with Replit Auth
+- **Goal**: Implement production-ready authentication using Replit's built-in OpenID Connect provider
+- **Requirements**:
+  1. Replace mock authentication with Replit Auth
+  2. Migrate from in-memory storage to PostgreSQL database
+  3. Create proper user sessions and authentication middleware
+  4. Update all protected routes to use real authentication
+- **Benefits**:
+  - Secure user authentication without managing passwords
+  - Seamless integration with Replit platform
+  - Production-ready authentication flow
+  - Support for user profiles and personalized data
+
+### Implementation Steps for Replit Auth
+
+1. **Database Schema Updates** (shared/schema.ts):
+   - Create users table with Replit user ID as primary key
+   - Add sessions table for authentication sessions
+   - Update all existing tables to include user_id foreign key
+   - Add proper relations between tables
+
+2. **Backend Authentication** (server/replitAuth.ts):
+   - Configure OpenID Connect with Replit provider
+   - Set up Passport.js with Replit strategy
+   - Implement session management with PostgreSQL store
+   - Add authentication middleware for protected routes
+
+3. **Storage Migration** (server/storage.ts):
+   - Replace MemStorage with DatabaseStorage
+   - Implement all IStorage interface methods with Drizzle ORM
+   - Add user-scoped data queries
+   - Ensure data isolation between users
+
+4. **Frontend Updates**:
+   - Update useAuth hook to fetch real user data
+   - Replace mock login/logout with Replit Auth endpoints
+   - Update ProtectedRoute component for real authentication
+   - Handle unauthorized errors with proper redirects
+
+5. **Data Migration**:
+   - Run database migrations with `npm run db:push`
+   - Update all API endpoints to filter by authenticated user
+   - Ensure all CRUD operations are user-scoped
+
+### Database Tables to Migrate
+
+- **users**: Replit user profiles and preferences
+- **sessions**: Authentication session storage
+- **accounts**: User bank accounts and balances
+- **transactions**: Financial transactions with categories
+- **categories**: Transaction categories
+- **credit_cards**: Credit card information
+- **credit_card_bills**: Monthly credit card bills
+- **budgets**: Monthly budget planning by category
+- **family_groups**: Shared family financial management
+- **notifications**: User notification preferences
 
 ## System Architecture
 
