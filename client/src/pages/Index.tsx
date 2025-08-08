@@ -33,7 +33,7 @@ const Index = () => {
                   <Settings className="w-4 h-4" />
                 </Button>
                 <Button 
-                  className="bg-gradient-primary hover:opacity-90"
+                  className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
                   onClick={() => setTransactionModalOpen(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" />

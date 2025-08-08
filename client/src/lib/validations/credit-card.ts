@@ -6,10 +6,10 @@ export const creditCardSchema = z.object({
   brand: z.enum(['VISA', 'MASTERCARD', 'ELO', 'AMEX', 'HIPERCARD', 'OTHER']),
   last_digits: z.string().length(4, "Últimos 4 dígitos devem ter 4 caracteres").optional().or(z.literal("")),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hexadecimal válido"),
-  credit_limit: z.number().min(0, "Limite deve ser positivo").optional().nullable(),
-  available_limit: z.number().min(0, "Limite disponível deve ser positivo").optional().nullable(),
-  closing_day: z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31").optional().nullable(),
-  due_day: z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31").optional().nullable(),
+  credit_limit: z.number().min(0, "Limite deve ser positivo"),
+  available_limit: z.number().min(0, "Limite disponível deve ser positivo"),
+  closing_day: z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31"),
+  due_day: z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31"),
   is_default: z.boolean().default(false),
   is_virtual: z.boolean().default(false),
   parent_card_id: z.string().uuid().optional().nullable(),
@@ -23,23 +23,16 @@ export const creditCardSchema = z.object({
   message: "Cartão virtual deve ter um cartão pai definido",
   path: ["parent_card_id"]
 }).refine((data) => {
-  // Se não for cartão de crédito, não deve ter limite
-  if (data.type !== 'CREDIT' && data.type !== 'CREDIT_DEBIT' && (data.credit_limit || data.available_limit)) {
-    return false;
+  // Se for cartão de crédito, deve ter limite e dias de fechamento/vencimento
+  if ((data.type === 'CREDIT' || data.type === 'CREDIT_DEBIT')) {
+    if (data.credit_limit === undefined || data.credit_limit === null) return false;
+    if (data.available_limit === undefined || data.available_limit === null) return false;
+    if (!data.closing_day) return false;
+    if (!data.due_day) return false;
   }
   return true;
 }, {
-  message: "Apenas cartões de crédito podem ter limite definido",
+  message: "Para cartões de crédito, limite, dia de fechamento e vencimento são obrigatórios",
   path: ["credit_limit"]
-}).refine((data) => {
-  // Se não for cartão de crédito, não deve ter dias de fechamento/vencimento
-  if (data.type !== 'CREDIT' && data.type !== 'CREDIT_DEBIT' && (data.closing_day || data.due_day)) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Apenas cartões de crédito podem ter dias de fechamento e vencimento",
-  path: ["closing_day"]
-});
 
 export type CreditCardFormData = z.infer<typeof creditCardSchema>;

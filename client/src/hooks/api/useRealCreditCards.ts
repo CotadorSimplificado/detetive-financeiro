@@ -107,17 +107,30 @@ export const useRealCreditCardsAPI = (userId: string) => {
     await queryClient.invalidateQueries({ queryKey: [CREDIT_CARDS_QUERY_KEY] });
   };
   
-  const createCreditCard = async (creditCard: CreateCreditCard) => {
-    return createCreditCardMutation.mutateAsync(creditCard);
-  };
+  const createCreditCard = createCreditCardMutation;
   
-  const updateCreditCard = async (id: string, creditCard: UpdateCreditCard) => {
-    return updateCreditCardMutation.mutateAsync({ id, userId, creditCard });
-  };
+  const updateCreditCard = useMutation({
+    mutationFn: (data: UpdateCreditCard & { id: string }) => {
+      const { id, ...creditCardData } = data;
+      return updateCreditCardMutation.mutateAsync({
+        id,
+        userId,
+        creditCard: creditCardData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CREDIT_CARDS_QUERY_KEY] });
+    },
+  });
   
-  const deleteCreditCard = async (id: string) => {
-    return deleteCreditCardMutation.mutateAsync({ id, userId });
-  };
+  const deleteCreditCard = useMutation({
+    mutationFn: (id: string) => {
+      return deleteCreditCardMutation.mutateAsync({ id, userId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CREDIT_CARDS_QUERY_KEY] });
+    },
+  });
   
   const getCreditCardById = (id: string) => {
     return allCreditCards.find((card: CreditCard) => card.id === id);

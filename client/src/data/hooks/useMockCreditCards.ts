@@ -1,4 +1,5 @@
 import { useMockStore } from '../store/mockContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreateCreditCard, UpdateCreditCard } from '../types';
 
 /**
@@ -11,15 +12,38 @@ export const useMockCreditCards = () => {
     creditCardsLoading,
     error,
     fetchCreditCards,
-    createCreditCard,
-    updateCreditCard,
-    deleteCreditCard,
+    createCreditCard: createCreditCardMock,
+    updateCreditCard: updateCreditCardMock,
+    deleteCreditCard: deleteCreditCardMock,
     getCreditCardById,
     getDefaultCreditCard,
     setDefaultCreditCard,
     getTotalCreditLimit,
     getTotalAvailableLimit,
   } = useMockStore();
+
+  const queryClient = useQueryClient();
+
+  const createCreditCard = useMutation({
+    mutationFn: createCreditCardMock,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mockCreditCards'] });
+    },
+  });
+
+  const updateCreditCard = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCreditCard }) => updateCreditCardMock(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mockCreditCards'] });
+    },
+  });
+
+  const deleteCreditCard = useMutation({
+    mutationFn: deleteCreditCardMock,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mockCreditCards'] });
+    },
+  });
 
   return {
     // Estado
