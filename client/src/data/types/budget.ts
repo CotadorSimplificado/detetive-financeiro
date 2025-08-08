@@ -20,6 +20,50 @@ export interface Budget extends BaseEntity {
   icon?: string;
 }
 
+// Novo tipo para planejamento mensal
+export interface MonthlyPlan extends BaseEntity {
+  user_id: string;
+  month: number; // 1-12
+  year: number;
+  total_budget: number;
+  category_budgets: CategoryBudget[];
+  created_from_previous?: boolean; // Se foi copiado do mês anterior
+}
+
+export interface CategoryBudget {
+  category_id: string;
+  planned_amount: number;
+  spent_amount?: number; // Calculado dinamicamente
+  percentage_used?: number; // Calculado dinamicamente
+}
+
+export interface MonthlyPlanSummary {
+  plan: MonthlyPlan;
+  total_planned: number;
+  total_spent: number;
+  total_remaining: number;
+  percentage_used: number;
+  categories_summary: CategoryBudgetSummary[];
+  alerts: PlanAlert[];
+}
+
+export interface CategoryBudgetSummary extends CategoryBudget {
+  category_name: string;
+  category_icon?: string;
+  category_color?: string;
+  status: 'SAFE' | 'WARNING' | 'DANGER' | 'EXCEEDED';
+  is_over_budget: boolean;
+}
+
+export interface PlanAlert {
+  category_id: string;
+  category_name: string;
+  alert_type: 'APPROACHING_LIMIT' | 'EXCEEDED' | 'NO_BUDGET';
+  current_amount: number;
+  planned_amount: number;
+  percentage: number;
+}
+
 export interface BudgetSpending {
   budget_id: string;
   category_id: string;

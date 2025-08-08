@@ -2,12 +2,16 @@ import { FinancialCard } from "./FinancialCard";
 import { DonutChart } from "../charts/DonutChart";
 import { CustomLineChart } from "../charts/LineChart";
 import { CustomBarChart } from "../charts/BarChart";
-import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, PiggyBank, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useMockStore } from "@/data/store/mockContext";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/currency-utils";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { useCreditCardBills } from '@/hooks/useCreditCardBills';
+import { useMonthlyPlan } from '@/hooks/useMonthlyPlan';
 
 // Mock data - in real app, this would come from your backend
 const expenseData = [
@@ -55,6 +59,9 @@ export const DashboardCards = () => {
     loading
   } = useMockStore();
 
+  const { data: bills = [] } = useCreditCardBills();
+  const { planSummary } = useMonthlyPlan();
+
   // Se ainda está carregando dados de autenticação
   if (loading || !isAuthenticated) {
     return (
@@ -71,7 +78,7 @@ export const DashboardCards = () => {
   const totalAvailableLimit = getTotalAvailableLimit();
   const creditCardUsed = totalCreditLimit - totalAvailableLimit;
   const creditCardPercentage = totalCreditLimit > 0 ? (creditCardUsed / totalCreditLimit) * 100 : 0;
-  
+
   // Calcular receitas e despesas do mês atual
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -79,17 +86,17 @@ export const DashboardCards = () => {
     const date = new Date(t.date);
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
-  
+
   const monthlyIncome = currentMonthTransactions
     .filter(t => t.type === 'INCOME')
     .reduce((sum, t) => sum + t.amount, 0);
-    
+
   const monthlyExpenses = currentMonthTransactions
     .filter(t => t.type === 'EXPENSE')
     .reduce((sum, t) => sum + t.amount, 0);
-    
+
   const monthlyBalance = monthlyIncome - monthlyExpenses;
-  
+
   // Meta de economia (valores mock - idealmente viriam de preferências do usuário)
   const savingsGoal = 20000;
   const currentSavings = totalBalance * 0.6; // Simular que 60% do saldo é poupança
@@ -202,31 +209,115 @@ export const DashboardCards = () => {
         </div>
       </FinancialCard>
 
+      {/* Planejamento Mensal */}
+        <Card className="col-span-1 md:col-span-2 lg:col-span-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              Planejamento Mensal
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {planSummary ? (
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Progresso Geral</span>
+                    <span className="text-sm text-muted-foreground">
+                      {planSummary.percentage_used.toFixed(0)}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={Math.min(planSummary.percentage_used, 100)} 
+                    className="h-2" 
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatCurrency(planSummary.total_spent)} de {formatCurrency(planSummary.total_planned)}
+                  </p>
+                </div>
+
+                {planSummary.alerts.length > 0 && (
+                  <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className="h-3 w-3 text-yellow-600" />
+                      <span className="text-xs font-medium text-yellow-800 dark:text-yellow-200">
+                        {planSummary.alerts.length} categoria(s) com alerta
+                      </span>
+                    </div>
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                      {planSummary.alerts[0].category_name} - {planSummary.alerts[0].percentage.toFixed(0)}%
+                      {planSummary.alerts.length > 1 && ` e mais ${planSummary.alerts.length - 1}`}
+                    </p>
+                  </div>
+                )}
+
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/budgets">
+                    Ver Detalhes
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <Target className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Nenhum planejamento para este mês
+                </p>
+                <Button asChild size="sm" className="w-full">
+                  <Link to="/budgets">
+                    Criar Planejamento
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
       {/* Meta de Economia */}
-      <FinancialCard
-        title="Meta de Economia"
-        variant="goal"
-        icon={<Target className="h-5 w-5" />}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Progresso</span>
-            <span className="text-sm font-semibold">{savingsProgress.toFixed(1)}%</span>
+      <Card className="col-span-1 md:col-span-2 lg:col-span-1">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Target className="h-5 w-5 text-blue-600" />
+            Meta de Economia
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Emergência</span>
+                <span className="text-sm text-muted-foreground">65%</span>
+              </div>
+              <Progress value={65} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatCurrency(6500)} de {formatCurrency(10000)}
+              </p>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Viagem</span>
+                <span className="text-sm text-muted-foreground">30%</span>
+              </div>
+              <Progress value={30} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatCurrency(1500)} de {formatCurrency(5000)}
+              </p>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Casa Própria</span>
+                <span className="text-sm text-muted-foreground">45%</span>
+              </div>
+              <Progress value={45} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatCurrency(22500)} de {formatCurrency(50000)}
+              </p>
+            </div>
           </div>
-          <Progress value={savingsProgress} className="h-3" />
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              {formatCurrency(currentSavings)}
-            </span>
-            <span className="text-muted-foreground">
-              {formatCurrency(savingsGoal)}
-            </span>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            Faltam {formatCurrency(savingsGoal - currentSavings)} para atingir a meta
-          </div>
-        </div>
-      </FinancialCard>
+        </CardContent>
+      </Card>
 
       {/* Tendência de Gastos */}
       <FinancialCard

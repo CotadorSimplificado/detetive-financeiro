@@ -10,6 +10,10 @@ import { IncomeForm } from "./IncomeForm";
 import { ExpenseForm } from "./ExpenseForm";
 import { CreditCardExpenseForm } from "./CreditCardExpenseForm";
 import { TransferForm } from "./TransferForm";
+import { useCreateTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
+import { useMonthlyPlan } from '@/hooks/useMonthlyPlan';
+import { Transaction } from '@/data/types';
+import { toast } from 'sonner';
 
 interface TransactionModalProps {
   open: boolean;
@@ -68,6 +72,58 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
     }
   };
 
+  const createTransaction = useCreateTransaction();
+  const updateTransaction = useUpdateTransaction();
+  const { checkTransactionAlert } = useMonthlyPlan();
+
+  const handleSubmit = async (data: TransactionFormData) => {
+    try {
+      // Verificar alertas de orçamento para despesas
+      if ((data.type === 'EXPENSE' || data.type === 'CREDIT_CARD_EXPENSE') && data.category_id && data.amount) {
+        const alert = checkTransactionAlert(data.category_id, data.amount);
+
+        if (alert) {
+          let alertMessage = '';
+
+          switch (alert.alert_type) {
+            case 'EXCEEDED':
+              alertMessage = `Esta despesa ultrapassará o orçamento de ${alert.category_name} em ${((alert.percentage - 100)).toFixed(1)}%`;
+              break;
+            case 'NO_BUDGET':
+              alertMessage = `A categoria ${alert.category_name} não possui orçamento definido para este mês`;
+              break;
+            default:
+              alertMessage = `Atenção: esta despesa afetará o orçamento de ${alert.category_name}`;
+          }
+
+          // Mostrar toast de aviso (não bloqueia a ação)
+          toast.warning(alertMessage, {
+            duration: 5000,
+            action: {
+              label: 'Ver Planejamento',
+              onClick: () => window.location.href = '/budgets'
+            }
+          });
+        }
+      }
+
+      if (editingTransaction) {
+        await updateTransaction.mutateAsync({ 
+          id: editingTransaction.id, 
+          ...data 
+        });
+        toast.success('Transação atualizada com sucesso!');
+      } else {
+        await createTransaction.mutateAsync(data);
+        toast.success('Transação criada com sucesso!');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Erro ao salvar transação:', error);
+      toast.error('Erro ao salvar transação');
+    }
+  };
+
   return (
     <>
       {/* Dialog para seleção do tipo */}
@@ -94,7 +150,7 @@ export function TransactionModal({ open, onOpenChange }: TransactionModalProps) 
           <DialogHeader>
             <DialogTitle>{getTitle()}</DialogTitle>
           </DialogHeader>
-          
+
           <div id="transaction-form-description" className="py-4">
             {renderForm()}
           </div>
