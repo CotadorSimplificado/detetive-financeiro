@@ -14,27 +14,23 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { useCategories } from "@/hooks/useCategories";
 import { formatDateBR, isCurrentMonth } from "@/lib/date-utils";
 import { Plus, Search, Filter, ArrowUpDown, Calendar } from "lucide-react";
-import { useCompetenceNavigation } from "@/hooks/useCompetenceFilter";
+import { useCompetenceFilter } from "@/hooks/useCompetenceFilter";
 
 export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
-  const [competenceDate, setCompetenceDate] = useState(new Date());
-
-  // Keyboard navigation for competence filter
-  useCompetenceNavigation(
-    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)),
-    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-  );
+  
+  // Use global competence filter
+  const { currentCompetence, setCompetenceDate } = useCompetenceFilter();
 
   // Criar filtros para as queries
   const filters = useMemo(() => ({
     type: typeFilter === "all" ? undefined : typeFilter as any,
-    competence_month: competenceDate.getMonth() + 1, // getMonth() returns 0-11
-    competence_year: competenceDate.getFullYear(),
-  }), [typeFilter, competenceDate]);
+    competence_month: currentCompetence.month,
+    competence_year: currentCompetence.year,
+  }), [typeFilter, currentCompetence.month, currentCompetence.year]);
 
   // Hooks para buscar dados
   const { data: transactions = [], isLoading: isLoadingTransactions, error: transactionsError } = useTransactions(filters);
@@ -90,8 +86,8 @@ export default function Transactions() {
           <div>
             <h1 className="text-2xl font-bold">Transações</h1>
             <p className="text-muted-foreground">
-              {searchTerm || typeFilter !== "all" || !isCurrentMonth(competenceDate) 
-                ? `Mostrando transações de ${formatDateBR(competenceDate, "MMMM 'de' yyyy").toLowerCase()}`
+              {searchTerm || typeFilter !== "all" || !isCurrentMonth(currentCompetence.date) 
+                ? `Mostrando transações de ${formatDateBR(currentCompetence.date, "MMMM 'de' yyyy").toLowerCase()}`
                 : "Visualize e gerencie todas as suas movimentações financeiras"
               }
             </p>
@@ -148,7 +144,7 @@ export default function Transactions() {
           {/* Competence Filter */}
           <div className="flex justify-center">
             <CompetenceFilter 
-              currentDate={competenceDate}
+              currentDate={currentCompetence.date}
               onDateChange={setCompetenceDate}
               isLoading={isLoadingTransactions || isLoadingSummary}
             />

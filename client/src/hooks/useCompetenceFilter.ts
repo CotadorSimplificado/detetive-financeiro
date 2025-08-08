@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Hook to handle keyboard navigation for competence filter
@@ -29,7 +29,25 @@ export function useCompetenceNavigation(onPrevious: () => void, onNext: () => vo
  * Hook to provide competence filter state and actions
  */
 export function useCompetenceFilter() {
-  // This hook can be extended with more functionality as needed
-  // For now, it's a placeholder for future enhancements
-  return {};
+  const [competenceDate, setCompetenceDate] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+
+  // Keyboard navigation for competence filter
+  useCompetenceNavigation(
+    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)),
+    () => setCompetenceDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  );
+
+  const currentCompetence = {
+    month: competenceDate.getMonth() + 1, // JavaScript months are 0-indexed
+    year: competenceDate.getFullYear(),
+    date: competenceDate
+  };
+
+  return {
+    currentCompetence,
+    setCompetenceDate
+  };
 }
