@@ -19,8 +19,7 @@ export default function Landing() {
             size="lg" 
             className="text-lg px-8 py-4"
             onClick={() => {
-              // Abrir em nova aba para melhor experiência de auth
-              window.open('/api/login', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+              window.location.href = '/api/login';
             }}
             data-testid="button-login"
           >
@@ -96,8 +95,7 @@ export default function Landing() {
             size="lg" 
             variant="outline"
             onClick={() => {
-              // Abrir em nova aba para melhor experiência de auth
-              window.open('/api/login', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+              window.location.href = '/api/login';
             }}
             data-testid="button-cta-login"
           >

@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, User } from "lucide-react";
+import type { User as UserType } from "@/types/auth";
 
 export default function Home() {
-  const auth = useAuth();
-  const user = 'user' in auth ? auth.user : null;
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800">
@@ -14,7 +14,7 @@ export default function Home() {
         <div className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Bem-vindo, {(user as any)?.firstName || 'Detetive'}!
+              Bem-vindo, {user?.firstName || 'Detetive'}!
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               Seu painel de controle financeiro está pronto
@@ -22,9 +22,9 @@ export default function Home() {
           </div>
           
           <div className="flex items-center gap-4">
-            {(user as any)?.profileImageUrl && (
+            {user?.profileImageUrl && (
               <img 
-                src={(user as any).profileImageUrl} 
+                src={user.profileImageUrl} 
                 alt="Profile" 
                 className="w-10 h-10 rounded-full object-cover"
                 data-testid="img-profile"
@@ -32,7 +32,7 @@ export default function Home() {
             )}
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <User className="w-4 h-4" />
-              <span data-testid="text-user-email">{(user as any)?.email}</span>
+              <span data-testid="text-user-email">{user?.email}</span>
             </div>
             <Button 
               variant="outline" 
@@ -107,19 +107,19 @@ export default function Home() {
                 <div className="flex justify-between">
                   <span>Nome:</span>
                   <span className="font-medium" data-testid="text-user-name">
-                    {(user as any)?.firstName} {(user as any)?.lastName}
+                    {user?.firstName} {user?.lastName}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Email:</span>
                   <span className="font-medium" data-testid="text-user-email-detail">
-                    {(user as any)?.email}
+                    {user?.email}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>ID:</span>
                   <span className="font-medium text-xs font-mono" data-testid="text-user-id">
-                    {(user as any)?.id}
+                    {user?.id}
                   </span>
                 </div>
               </div>

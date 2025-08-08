@@ -21,9 +21,7 @@ import Reports from './pages/Reports';
 import Budgets from './pages/Budgets';
 
 const RootComponent = () => {
-  const auth = useAuth();
-  const { isAuthenticated } = auth;
-  const isLoading = 'isLoading' in auth ? auth.isLoading : auth.loading;
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">

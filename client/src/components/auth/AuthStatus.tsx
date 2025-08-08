@@ -2,12 +2,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import type { User } from "@/types/auth";
 
 export function AuthStatus() {
-  const auth = useAuth();
-  const isLoading = 'isLoading' in auth ? auth.isLoading : auth.loading;
-  const { isAuthenticated } = auth;
-  const user = 'user' in auth ? auth.user : null;
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -35,13 +33,13 @@ export function AuthStatus() {
         {isAuthenticated && user && (
           <div className="space-y-2">
             <p className="text-sm">
-              <strong>Usuário:</strong> {(user as any)?.firstName || 'Usuário'} {(user as any)?.lastName || ''}
+              <strong>Usuário:</strong> {user?.firstName || 'Usuário'} {user?.lastName || ''}
             </p>
             <p className="text-sm">
-              <strong>Email:</strong> {(user as any)?.email || 'N/A'}
+              <strong>Email:</strong> {user?.email || 'N/A'}
             </p>
             <p className="text-sm">
-              <strong>ID:</strong> <code className="text-xs">{(user as any)?.id || 'N/A'}</code>
+              <strong>ID:</strong> <code className="text-xs">{user?.id || 'N/A'}</code>
             </p>
           </div>
         )}
@@ -54,7 +52,7 @@ export function AuthStatus() {
             <Button 
               className="w-full"
               onClick={() => {
-                window.open('/api/login', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+                window.location.href = '/api/login';
               }}
             >
               Fazer Login
