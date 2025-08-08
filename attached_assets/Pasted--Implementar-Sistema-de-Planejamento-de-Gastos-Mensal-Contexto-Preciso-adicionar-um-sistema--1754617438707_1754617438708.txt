@@ -1,0 +1,155 @@
+# Implementar Sistema de Planejamento de Gastos Mensal
+
+## Contexto
+Preciso adicionar um sistema de planejamento de gastos (orçamento) na aplicação financeira. O usuário poderá criar um planejamento único para cada mês, definindo quanto pretende gastar no total e distribuindo esse valor entre as categorias de despesa.
+
+## Requisitos Funcionais
+
+### 1. Estrutura do Planejamento
+
+**Planejamento Mensal:**
+- Cada mês pode ter apenas UM planejamento
+- O planejamento tem um valor total de gastos previstos para o mês
+- O usuário define quanto pretende gastar em cada categoria de despesa
+- A soma dos valores das categorias não precisa ser igual ao total (pode sobrar)
+- O planejamento é específico do usuário logado
+
+**Orçamento por Categoria:**
+- Cada categoria de despesa pode ter um valor planejado
+- Nem todas as categorias precisam ter valor definido
+- O sistema deve calcular automaticamente quanto já foi gasto em cada categoria
+- Mostrar o percentual usado de cada categoria (gasto/planejado)
+
+### 2. Funcionalidades Principais
+
+**2.1 Criar Planejamento:**
+- Nova página/seção "Planejamento" ou "Orçamento" no menu
+- Seletor de mês/ano no topo da página
+- Campo para definir o orçamento total do mês
+- Lista de todas as categorias de despesa disponíveis
+- Para cada categoria, um campo para inserir o valor planejado
+- Botão salvar o planejamento
+
+**2.2 Copiar Planejamento Anterior:**
+- Ao navegar para um mês que não tem planejamento
+- Se o mês anterior tem planejamento, mostrar botão/opção "Copiar do mês anterior"
+- Ao copiar, trazer todos os valores do mês anterior
+- Permitir editar os valores antes de salvar
+
+**2.3 Visualização do Planejamento:**
+- Mostrar resumo no topo: Orçamento Total | Total Gasto | Disponível
+- Para cada categoria mostrar:
+  - Nome da categoria
+  - Valor planejado
+  - Valor já gasto (calculado das transações)
+  - Percentual usado (com barra de progresso)
+  - Status visual (cores: verde até 70%, amarelo até 90%, vermelho acima de 100%)
+
+**2.4 Sistema de Alertas:**
+- Ao criar/editar uma transação de despesa
+- Verificar se a categoria tem orçamento definido no mês
+- Se o novo lançamento fará ultrapassar o orçamento da categoria:
+  - Mostrar alerta/notificação ao usuário
+  - Informar: "Esta despesa ultrapassará o orçamento de [categoria] em X%"
+  - Permitir que o usuário continue ou cancele
+- Usar toast notifications para os alertas
+
+### 3. Regras de Negócio
+
+**3.1 Validações:**
+- Orçamento total deve ser maior que zero
+- Valores de categoria não podem ser negativos
+- Apenas um planejamento por mês por usuário
+- Não permitir editar planejamento de meses passados (opcional)
+
+**3.2 Cálculos:**
+- Valor gasto por categoria = soma de todas as despesas da categoria no mês
+- Incluir tanto transações da conta quanto do cartão de crédito
+- Percentual usado = (valor gasto / valor planejado) * 100
+- Total disponível = orçamento total - soma de todos os gastos
+
+**3.3 Comportamentos:**
+- Ao mudar de mês, carregar o planejamento daquele mês se existir
+- Se não existir, mostrar tela vazia com opção de criar ou copiar
+- Os alertas devem ser não-bloqueantes (o usuário pode ignorar)
+- Salvar no mock store como as outras entidades
+
+### 4. Interface Visual
+
+**4.1 Página de Planejamento deve ter:**
+- Header com seletor de mês e resumo financeiro
+- Seção principal com lista de categorias e campos de valor
+- Visualização em cards ou tabela (escolher o melhor)
+- Gráfico de pizza mostrando distribuição planejada
+- Gráfico de barras comparando planejado vs realizado
+
+**4.2 Integração com Dashboard:**
+- Adicionar card no dashboard mostrando resumo do orçamento do mês
+- Mostrar progresso geral (total gasto / orçamento total)
+- Listar categorias que estão próximas ou acima do limite
+
+**4.3 Indicadores Visuais:**
+- Usar cores consistentes com o resto da aplicação
+- Barras de progresso para mostrar uso do orçamento
+- Ícones ou badges para estados (dentro do orçamento, atenção, ultrapassado)
+- Manter consistência com o dark theme
+
+### 5. Etapas de Implementação Sugeridas
+
+**Etapa 1 - Estrutura de Dados:**
+- Criar as interfaces/types para BudgetPlan e BudgetCategory
+- Adicionar ao mock store
+- Criar hooks (useBudgetPlan ou useMonthlyBudget)
+
+**Etapa 2 - Página Básica:**
+- Criar a página de planejamento
+- Implementar seletor de mês
+- Formulário para criar/editar planejamento
+- Salvar e recuperar do mock store
+
+**Etapa 3 - Funcionalidade de Cópia:**
+- Detectar quando não há planejamento no mês
+- Buscar planejamento do mês anterior
+- Implementar função de copiar
+- UI para confirmar cópia
+
+**Etapa 4 - Cálculos e Visualização:**
+- Calcular gastos por categoria do mês
+- Implementar barras de progresso
+- Adicionar indicadores de status
+- Criar gráficos de acompanhamento
+
+**Etapa 5 - Sistema de Alertas:**
+- Interceptar criação/edição de transações
+- Verificar orçamento da categoria
+- Implementar lógica de alertas
+- Mostrar notificações com toast
+
+**Etapa 6 - Integração com Dashboard:**
+- Criar card de resumo do orçamento
+- Adicionar ao dashboard existente
+- Mostrar categorias críticas
+
+### 6. Considerações Técnicas
+
+- Usar os mesmos padrões já estabelecidos no código (TypeScript, Zod, React Hook Form)
+- Manter consistência visual com shadcn/ui components
+- Implementar no mock store primeiro (preparado para migração futura)
+- Reutilizar componentes existentes quando possível
+- Manter responsividade mobile
+- Seguir o padrão de hooks customizados já usado
+
+### 7. Critérios de Aceitação
+
+- [ ] Usuário pode criar um planejamento mensal
+- [ ] Usuário pode definir orçamento por categoria
+- [ ] Sistema calcula automaticamente os gastos
+- [ ] Funcionalidade de copiar mês anterior funciona
+- [ ] Alertas aparecem ao ultrapassar orçamento
+- [ ] Visualização clara do progresso de cada categoria
+- [ ] Integração com dashboard mostrando resumo
+- [ ] Responsivo e funcionando no dark theme
+- [ ] Dados persistindo no mock store
+
+## Observação Final
+Implemente de forma incremental, começando pela estrutura básica e adicionando features progressivamente. Mantenha o código organizado e preparado para futura migração para backend real.
