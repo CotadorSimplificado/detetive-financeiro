@@ -12,6 +12,8 @@ export const queryClient = new QueryClient({
         return failureCount < 3;
       },
       refetchOnWindowFocus: false,
+      // Fetcher padrão: assume primeira posição da queryKey como URL
+      queryFn: ({ queryKey }) => apiRequest(queryKey[0] as string),
     },
     mutations: {
       retry: false,
@@ -88,7 +90,5 @@ export const defaultQueryFn = async ({ queryKey }: { queryKey: any[] }) => {
   return apiRequest(url);
 };
 
-// Configurar o fetcher padrão
-queryClient.setQueryDefaults([''], {
-  queryFn: defaultQueryFn,
-});
+// Mantido por compatibilidade com chamadas antigas específicas
+queryClient.setQueryDefaults([''], { queryFn: defaultQueryFn });

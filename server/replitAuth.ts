@@ -8,8 +8,11 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+// Detecta ambiente Replit (produção) x preview/local
+export const isReplitEnv = Boolean(process.env.REPLIT_DOMAINS && process.env.REPL_ID);
+if (!isReplitEnv) {
+  // No preview/local, cairemos para um modo de autenticação mock
+  console.warn("[auth] REPLIT_DOMAINS/REPL_ID não definidos. Usando autenticação de preview (mock).");
 }
 
 const getOidcConfig = memoize(
@@ -68,71 +71,124 @@ async function upsertUser(
 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
-  app.use(getSession());
-  app.use(passport.initialize());
-  app.use(passport.session());
 
-  const config = await getOidcConfig();
+  if (isReplitEnv) {
+    // Produção (Replit): usa sessão no Postgres + Passport OIDC
+    app.use(getSession());
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
+    const config = await getOidcConfig();
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    console.log('Registering strategy for domain:', domain);
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
-  }
+    const verify: VerifyFunction = async (
+      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+      verified: passport.AuthenticateCallback
+    ) => {
+      const user = {} as any;
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims());
+      verified(null, user);
+    };
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
-
-  app.get("/api/login", (req, res, next) => {
-    const domain = req.get('host') || req.hostname;
-    console.log('Login attempt for domain:', domain);
-    passport.authenticate(`replitauth:${domain}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
-  });
-
-  app.get("/api/callback", (req, res, next) => {
-    const domain = req.get('host') || req.hostname;
-    console.log('Callback for domain:', domain);
-    passport.authenticate(`replitauth:${domain}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, next);
-  });
-
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
+    for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
+      console.log('Registering strategy for domain:', domain);
+      const strategy = new Strategy(
+        {
+          name: `replitauth:${domain}`,
+          config,
+          scope: "openid email profile offline_access",
+          callbackURL: `https://${domain}/api/callback`,
+        },
+        verify,
       );
+      passport.use(strategy);
+    }
+
+    passport.serializeUser((user: Express.User, cb) => cb(null, user));
+    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+
+    app.get("/api/login", (req, res, next) => {
+      const domain = req.get('host') || req.hostname;
+      console.log('Login attempt for domain:', domain);
+      passport.authenticate(`replitauth:${domain}`, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+      })(req, res, next);
     });
-  });
+
+    app.get("/api/callback", (req, res, next) => {
+      const domain = req.get('host') || req.hostname;
+      console.log('Callback for domain:', domain);
+      passport.authenticate(`replitauth:${domain}`, {
+        successReturnToOrRedirect: "/",
+        failureRedirect: "/api/login",
+      })(req, res, next);
+    });
+
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect(
+          client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID!,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href
+        );
+      });
+    });
+  } else {
+    // Preview/Local: sessão em memória e rotas mock
+    app.use(session({
+      secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      },
+    }));
+
+    app.get("/api/login", (req, res) => {
+      // Marca sessão mock e redireciona para a aplicação
+      (req.session as any).devUser = {
+        id: 'mock-user-id',
+        email: 'usuario@exemplo.com',
+        first_name: 'Usuário',
+        last_name: 'Exemplo',
+        profile_image_url: '',
+      };
+      res.redirect("/");
+    });
+
+    app.get("/api/logout", (req, res) => {
+      if (req.session) {
+        req.session.destroy(() => {
+          res.redirect("/");
+        });
+      } else {
+        res.redirect("/");
+      }
+    });
+  }
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!isReplitEnv) {
+    // Preview/Local: injeta usuário mock e permite acesso
+    const devUser = (req.session as any)?.devUser;
+    (req as any).user = {
+      claims: {
+        sub: devUser?.id || 'mock-user-id',
+        email: devUser?.email || 'usuario@exemplo.com',
+        first_name: devUser?.first_name || 'Usuário',
+        last_name: devUser?.last_name || 'Exemplo',
+        profile_image_url: devUser?.profile_image_url || '',
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+    };
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {

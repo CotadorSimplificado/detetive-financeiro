@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isReplitEnv } from "./replitAuth";
 import { 
   insertCategorySchema,
   insertAccountSchema,
@@ -36,6 +36,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
+      // Em preview/local, retornar usuário mock sem acessar DB
+      if (!isReplitEnv) {
+        const mockUser = {
+          id: req.user?.claims.sub,
+          email: req.user?.claims.email || 'usuario@exemplo.com',
+          firstName: req.user?.claims.first_name || 'Usuário',
+          lastName: req.user?.claims.last_name || 'Exemplo',
+          profileImageUrl: req.user?.claims.profile_image_url || null,
+        };
+        return res.json(mockUser);
+      }
+
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
