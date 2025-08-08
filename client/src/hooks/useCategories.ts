@@ -14,7 +14,7 @@ export const useCategories = () => {
 // Função utilitária para sugestão de categoria baseada na descrição
 export const suggestCategoryByDescription = (description: string, categories: any[]) => {
   const desc = description.toLowerCase();
-  
+
   // Mapeamento simples de palavras-chave para nomes de categorias
   const categoryMappings = {
     'supermercado': 'Supermercado',
@@ -39,7 +39,7 @@ export const suggestCategoryByDescription = (description: string, categories: an
     'conta de água': 'Contas Básicas',
     'internet': 'Contas Básicas',
   };
-  
+
   for (const [keyword, categoryName] of Object.entries(categoryMappings)) {
     if (desc.includes(keyword)) {
       // Procurar categoria pelo nome
@@ -49,7 +49,7 @@ export const suggestCategoryByDescription = (description: string, categories: an
       return category || null;
     }
   }
-  
+
   return null; // Retorna null se não encontrar sugestão
 };
 

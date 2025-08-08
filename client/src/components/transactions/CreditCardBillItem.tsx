@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { CreditCard, Calendar, DollarSign } from "lucide-react";
+import { CreditCard, Calendar, DollarSign, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PayBillModal } from "./PayBillModal";
 import { CreditCardBill } from "@/hooks/useCreditCardBills";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNavigate } from 'react-router-dom';
 
 interface CreditCardBillItemProps {
   bill: CreditCardBill;
@@ -13,6 +14,7 @@ interface CreditCardBillItemProps {
 
 export function CreditCardBillItem({ bill }: CreditCardBillItemProps) {
   const [showPayModal, setShowPayModal] = useState(false);
+  const navigate = useNavigate();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -35,7 +37,7 @@ export function CreditCardBillItem({ bill }: CreditCardBillItemProps) {
           <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20">
             <CreditCard className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           </div>
-          
+
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-medium text-foreground">
@@ -59,7 +61,7 @@ export function CreditCardBillItem({ bill }: CreditCardBillItemProps) {
                 </Badge>
               )}
             </div>
-            
+
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
@@ -82,17 +84,28 @@ export function CreditCardBillItem({ bill }: CreditCardBillItemProps) {
             </div>
           </div>
 
-          {!bill.is_paid && (
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowPayModal(true)}
+              onClick={() => navigate(`/bills/${bill.id}`)}
               className="min-w-20"
             >
-              <DollarSign className="h-4 w-4 mr-1" />
-              Pagar
+              <Eye className="h-4 w-4 mr-1" />
+              Detalhes
             </Button>
-          )}
+            {!bill.is_paid && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPayModal(true)}
+                className="min-w-20"
+              >
+                <DollarSign className="h-4 w-4 mr-1" />
+                Pagar
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

@@ -12,6 +12,7 @@ import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
 import Cards from "./pages/Cards";
 import NotFound from "./pages/NotFound";
+import BillDetails from './pages/BillDetails';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,11 @@ const App = () => (
             <Route path="/cards" element={
               <ProtectedRoute>
                 <Cards />
+              </ProtectedRoute>
+            } />
+            <Route path="/bills/:billId" element={
+              <ProtectedRoute>
+                <BillDetails />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
