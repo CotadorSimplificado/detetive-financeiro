@@ -38,7 +38,8 @@ const RootComponent = () => {
     return <Login />;
   }
 
-  return <Home />;
+  // Se está autenticado, mostra o dashboard principal (Index)
+  return <Index />;
 };
 
 const App = () => (

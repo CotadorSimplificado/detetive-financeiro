@@ -2,8 +2,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
-import { usePageTransition } from "@/hooks/usePageTransition";
-import { LoadingOverlay } from "@/components/ui/loading";
 import { 
   Home, 
   ArrowLeftRight, 
@@ -77,11 +75,11 @@ const navigationItems = [
 ];
 
 export const Sidebar = ({ className, activeTab = "dashboard", onTabChange, onNewTransaction }: SidebarProps) => {
-  const { isTransitioning, navigateWithTransition } = usePageTransition();
+  
 
   return (
     <>
-      <LoadingOverlay isVisible={isTransitioning} message="Navegando..." />
+      
 
       <div className={cn("pb-12 w-64", className)}>
         <div className="space-y-4 py-4">
@@ -136,10 +134,6 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange, onNew
                     >
                       <Link 
                         to={item.href}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigateWithTransition(item.href);
-                        }}
                       >
                         <Icon className="mr-3 h-4 w-4" />
                         {item.label}
