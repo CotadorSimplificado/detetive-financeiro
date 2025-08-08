@@ -22,19 +22,19 @@ interface FeatureFlags {
 
 // Configuração padrão das feature flags
 const defaultFlags: FeatureFlags = {
-  // Começar com categorias ativas
+  // Fase 2: Todas as entidades migradas
   useRealCategories: true,
+  useRealAccounts: true,
+  useRealTransactions: true,
+  useRealCreditCards: true,
   
-  // Outras funcionalidades ainda em mock
-  useRealAccounts: false,
-  useRealTransactions: false,
-  useRealCreditCards: false,
+  // Fase 3: Auth e features avançadas
   useRealAuth: false,
   useRealBudgets: false,
   useRealReports: false,
   
-  // Debug desabilitado por padrão
-  debugMode: false,
+  // Debug ativo para validação
+  debugMode: true,
   parallelMode: false,
 };
 

@@ -34,8 +34,8 @@ export async function apiRequest(
     ...options,
   };
 
-  // Se há body e não é FormData, serializar como JSON
-  if (config.body && !(config.body instanceof FormData)) {
+  // Se há body e não é FormData ou string, serializar como JSON
+  if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
     config.body = JSON.stringify(config.body);
   }
 
