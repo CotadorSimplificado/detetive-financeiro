@@ -65,6 +65,38 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
+// SEGURANÇA: Sanitizar CSS para evitar injeção
+function sanitizeCSS(css: string): string {
+  // Remove caracteres perigosos que podem ser usados para injeção
+  return css
+    .replace(/<\/?[^>]+(>|$)/g, '') // Remove HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .replace(/expression\(/gi, '') // Remove CSS expressions (IE)
+    .replace(/url\(/gi, '') // Remove url() para prevenir carregamento de recursos externos
+    .replace(/import/gi, '') // Remove @import
+    .replace(/@/g, '') // Remove @ rules em geral por segurança
+    .replace(/[<>]/g, ''); // Remove brackets que podem ser problemáticos
+}
+
+function sanitizeColorValue(color: string | undefined): string | null {
+  if (!color) return null;
+  
+  // Permitir apenas cores hexadecimais, rgb, rgba, hsl, hsla e nomes de cores CSS válidos
+  const colorPattern = /^(#[0-9A-Fa-f]{3,8}|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|[a-zA-Z]+)$/;
+  
+  if (!colorPattern.test(color.trim())) {
+    console.warn('[SECURITY] Invalid color value filtered:', color);
+    return null;
+  }
+  
+  return color.trim();
+}
+
+function sanitizeKey(key: string): string {
+  // Permitir apenas caracteres alfanuméricos, hífens e underscores para chaves CSS
+  return key.replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
@@ -74,25 +106,37 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // SEGURANÇA: Sanitizar ID para evitar injeção CSS
+  const sanitizedId = id.replace(/[^a-zA-Z0-9_-]/g, '');
+  
+  const cssContent = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      // Sanitizar prefix do tema
+      const sanitizedPrefix = sanitizeCSS(prefix);
+      
+      const colorRules = colorConfig
+        .map(([key, itemConfig]) => {
+          const sanitizedKey = sanitizeKey(key);
+          const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+          const sanitizedColor = sanitizeColorValue(color);
+          
+          return sanitizedColor ? `  --color-${sanitizedKey}: ${sanitizedColor};` : null;
+        })
+        .filter(Boolean)
+        .join('\n');
+        
+      return colorRules ? `${sanitizedPrefix} [data-chart="${sanitizedId}"] {\n${colorRules}\n}` : null;
+    })
+    .filter(Boolean)
+    .join('\n');
+
+  // SEGURANÇA: Sanitizar CSS final antes da injeção
+  const sanitizedCSS = sanitizeCSS(cssContent);
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
+        __html: sanitizedCSS,
       }}
     />
   )

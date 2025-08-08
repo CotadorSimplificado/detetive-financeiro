@@ -64,8 +64,7 @@ export default function Cards() {
         closingDay: parseInt(data.closing_day),
         dueDay: parseInt(data.due_day),
         isDefault: data.is_default,
-        isVirtual: data.is_virtual,
-        parentCardId: data.parent_card_id || undefined,
+        // Campos não suportados pelo backend atual foram removidos do payload
       };
 
       if (editingCard) {

@@ -23,6 +23,11 @@ declare global {
 const PgSession = connectPgSimple(session);
 
 export function setupAuth(app: Express) {
+  // Validate SESSION_SECRET is present
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required for security');
+  }
+
   // Session configuration with PostgreSQL store
   app.use(
     session({
@@ -30,13 +35,14 @@ export function setupAuth(app: Express) {
         conString: process.env.DATABASE_URL!,
         tableName: 'sessions',
       }),
-      secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: 'strict', // SEGURANÇA: Proteção contra ataques CSRF
       },
     })
   );

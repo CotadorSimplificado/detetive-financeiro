@@ -124,47 +124,52 @@ export class MockStore {
     // }
   }
 
+  // ===== SEGURANÇA - GERAÇÃO DE TOKENS =====
+
+  // Gerar token seguro usando crypto.getRandomValues
+  private generateSecureToken(): string {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    } else {
+      // Fallback para ambientes que não suportam crypto (muito raro)
+      console.warn('[SECURITY] crypto.getRandomValues not available, using fallback');
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    }
+  }
+
   // ===== PERSISTÊNCIA DE SESSÃO =====
 
   // Salvar sessão no localStorage
   private saveSessionToStorage(): void {
-    if (this.currentSession) {
-      try {
-        localStorage.setItem(this.SESSION_KEY, JSON.stringify(this.currentSession));
-      } catch (error) {
-        console.warn('Erro ao salvar sessão no localStorage:', error);
-      }
-    }
+    // SEGURANÇA: NÃO salvar tokens/sessões em localStorage
+    // Autenticação agora é gerenciada via httpOnly cookies seguros
+    console.log('[SECURITY] Session storage to localStorage disabled - using secure httpOnly cookies');
   }
 
-  // Carregar sessão do localStorage
+  // SEGURANÇA: NÃO carregar sessão do localStorage
   private loadSessionFromStorage(): void {
+    // SEGURANÇA: NÃO carregar tokens/sessões do localStorage inseguro
+    // Autenticação real via cookies httpOnly é gerenciada pelo backend
+    console.log('[SECURITY] Session loading from localStorage disabled - using secure API authentication');
+    
+    // Limpar qualquer sessão antiga por segurança
     try {
-      const sessionData = localStorage.getItem(this.SESSION_KEY);
-      if (sessionData) {
-        const session: MockSession = JSON.parse(sessionData);
-        
-        // Verificar se a sessão não expirou
-        if (session.expires_at > Date.now()) {
-          this.currentSession = session;
-          this.currentUser = session.user;
-        } else {
-          // Sessão expirada, remover do localStorage
-          this.clearSessionFromStorage();
-        }
-      }
+      localStorage.removeItem(this.SESSION_KEY);
+      console.log('[SECURITY] Removed old session tokens from localStorage');
     } catch (error) {
-      console.warn('Erro ao carregar sessão do localStorage:', error);
-      this.clearSessionFromStorage();
+      console.warn('[SECURITY] Error removing old session tokens:', error);
     }
   }
 
-  // Limpar sessão do localStorage
+  // SEGURANÇA: Limpar qualquer sessão insegura remanescente
   private clearSessionFromStorage(): void {
     try {
       localStorage.removeItem(this.SESSION_KEY);
+      console.log('[SECURITY] Cleared legacy session tokens from localStorage');
     } catch (error) {
-      console.warn('Erro ao limpar sessão do localStorage:', error);
+      console.warn('[SECURITY] Error clearing legacy session tokens:', error);
     }
   }
 
@@ -176,8 +181,8 @@ export class MockStore {
         this.currentUser = defaultUser;
         this.currentSession = {
           user: defaultUser,
-          access_token: 'mock-auto-login-token-' + Math.random().toString(36).substr(2, 9),
-          refresh_token: 'mock-auto-refresh-token-' + Math.random().toString(36).substr(2, 9),
+          access_token: 'mock-auto-login-token-' + this.generateSecureToken(),
+          refresh_token: 'mock-auto-refresh-token-' + this.generateSecureToken(),
           expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
         };
         
@@ -208,8 +213,8 @@ export class MockStore {
       this.currentUser = user;
       this.currentSession = {
         user,
-        access_token: 'mock-access-token-' + Math.random().toString(36).substr(2, 9),
-        refresh_token: 'mock-refresh-token-' + Math.random().toString(36).substr(2, 9),
+        access_token: 'mock-access-token-' + this.generateSecureToken(),
+        refresh_token: 'mock-refresh-token-' + this.generateSecureToken(),
         expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
       };
       
@@ -237,8 +242,8 @@ export class MockStore {
       this.currentUser = newUser;
       this.currentSession = {
         user: newUser,
-        access_token: 'mock-access-token-' + Math.random().toString(36).substr(2, 9),
-        refresh_token: 'mock-refresh-token-' + Math.random().toString(36).substr(2, 9),
+        access_token: 'mock-access-token-' + this.generateSecureToken(),
+        refresh_token: 'mock-refresh-token-' + this.generateSecureToken(),
         expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
       };
       
@@ -299,7 +304,7 @@ export class MockStore {
     
     // Estender sessão por mais 24 horas
     this.currentSession.expires_at = Date.now() + (24 * 60 * 60 * 1000);
-    this.currentSession.access_token = 'mock-access-token-' + Math.random().toString(36).substr(2, 9);
+    this.currentSession.access_token = 'mock-access-token-' + this.generateSecureToken();
     
     // Salvar sessão atualizada no localStorage
     this.saveSessionToStorage();

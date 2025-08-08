@@ -1,10 +1,20 @@
 import { z } from "zod";
 
 export const baseTransactionSchema = z.object({
-  description: z.string().min(1, "Descrição é obrigatória"),
+  description: z.string()
+    .min(1, "Descrição é obrigatória")
+    .max(200, "Descrição muito longa")
+    .refine((val) => !/<[^>]*>/g.test(val), {
+      message: "Descrição não pode conter tags HTML"
+    }),
   amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   date: z.date(),
-  notes: z.string().optional(),
+  notes: z.string()
+    .max(500, "Observações muito longas")
+    .refine((val) => !val || !/<[^>]*>/g.test(val), {
+      message: "Observações não podem conter tags HTML"
+    })
+    .optional(),
   category_id: z.string().uuid("Categoria é obrigatória"),
 });
 
@@ -24,10 +34,20 @@ export const expenseSchema = baseTransactionSchema.extend({
 );
 
 export const transferSchema = z.object({
-  description: z.string().min(1, "Descrição é obrigatória"),
+  description: z.string()
+    .min(1, "Descrição é obrigatória")
+    .max(200, "Descrição muito longa")
+    .refine((val) => !/<[^>]*>/g.test(val), {
+      message: "Descrição não pode conter tags HTML"
+    }),
   amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   date: z.date(),
-  notes: z.string().optional(),
+  notes: z.string()
+    .max(500, "Observações muito longas")
+    .refine((val) => !val || !/<[^>]*>/g.test(val), {
+      message: "Observações não podem conter tags HTML"
+    })
+    .optional(),
   transfer_from_id: z.string().min(1, "Conta de origem é obrigatória"),
   transfer_to_id: z.string().min(1, "Conta de destino é obrigatória"),
 }).refine(

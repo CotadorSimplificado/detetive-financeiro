@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export SESSION_SECRET=\"test-secret-key-for-development\")",
+      "Bash(timeout 5s npm run dev)",
+      "Bash(pkill:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
+    ],
+    "deny": []
+  }
+}

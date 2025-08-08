@@ -57,6 +57,29 @@ export function CreditCardForm({
     },
   });
 
+  // Quando editar um cartão, reidrata os valores do formulário
+  React.useEffect(() => {
+    const values: CreditCardFormData = {
+      name: defaultValues?.name || "",
+      type: (defaultValues as any)?.type || "CREDIT",
+      brand: (defaultValues as any)?.brand || "OTHER",
+      last_digits: (defaultValues as any)?.last_digits || "",
+      color: (defaultValues as any)?.color || "#2563eb",
+      credit_limit: (defaultValues as any)?.credit_limit
+        ? formatCurrencyInput((defaultValues as any).credit_limit as any)
+        : "0,00",
+      available_limit: (defaultValues as any)?.available_limit
+        ? formatCurrencyInput((defaultValues as any).available_limit as any)
+        : "0,00",
+      closing_day: (defaultValues as any)?.closing_day?.toString() || "1",
+      due_day: (defaultValues as any)?.due_day?.toString() || "1",
+      is_default: (defaultValues as any)?.is_default || false,
+      is_virtual: (defaultValues as any)?.is_virtual || false,
+      parent_card_id: (defaultValues as any)?.parent_card_id || null,
+    };
+    form.reset(values);
+  }, [defaultValues]);
+
   const watchType = form.watch("type");
   const watchIsVirtual = form.watch("is_virtual");
   const isCreditCard = watchType === "CREDIT" || watchType === "CREDIT_DEBIT";

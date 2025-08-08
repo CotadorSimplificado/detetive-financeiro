@@ -393,65 +393,37 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
     syncAuthState();
   }, []);
   
-  // Carregar estado do localStorage na inicialização
+  // SEGURANÇA: NÃO carregar dados financeiros sensíveis do localStorage
   useEffect(() => {
     const loadPersistedState = () => {
+      // REMOVIDO: Carregamento de dados financeiros do localStorage inseguro
+      // Os dados agora vêm diretamente da API backend com autenticação segura
+      console.log('[SECURITY] Financial data loading from localStorage disabled - using secure API backend');
+      
+      // Limpar qualquer dado financeiro antigo do localStorage por segurança
       try {
-        const persistedState = localStorage.getItem('detetive_financeiro_mock_state');
-        if (persistedState) {
-          const parsedState = JSON.parse(persistedState);
-          
-          // Restaurar apenas dados que devem persistir
-          if (parsedState.accounts) {
-            dispatch({ type: 'SET_ACCOUNTS', payload: parsedState.accounts });
-          }
-          if (parsedState.categories) {
-            dispatch({ type: 'SET_CATEGORIES', payload: parsedState.categories });
-          }
-          if (parsedState.transactions) {
-            dispatch({ type: 'SET_TRANSACTIONS', payload: parsedState.transactions });
-          }
-          if (parsedState.creditCards) {
-            dispatch({ type: 'SET_CREDIT_CARDS', payload: parsedState.creditCards });
-          }
-          if (parsedState.creditCardBills) {
-            dispatch({ type: 'SET_CREDIT_CARD_BILLS', payload: parsedState.creditCardBills });
-          }
-          if (parsedState.budgets) {
-            dispatch({ type: 'SET_BUDGETS', payload: parsedState.budgets });
-          }
-        }
+        localStorage.removeItem('detetive_financeiro_mock_state');
+        console.log('[SECURITY] Removed old financial data from localStorage');
       } catch (error) {
-        console.warn('Erro ao carregar estado persistido:', error);
+        console.warn('[SECURITY] Error removing old localStorage data:', error);
       }
     };
 
     loadPersistedState();
   }, []);
 
-  // Salvar estado no localStorage quando mudar
+  // SEGURANÇA: NÃO salvar dados financeiros sensíveis no localStorage
+  // Dados financeiros agora são gerenciados pelo backend via cookies httpOnly
   useEffect(() => {
     const savePersistedState = () => {
-      try {
-        const stateToPersist = {
-          accounts: state.accounts,
-          categories: state.categories,
-          transactions: state.transactions,
-          creditCards: state.creditCards,
-          creditCardBills: state.creditCardBills,
-          budgets: state.budgets,
-        };
-        localStorage.setItem('detetive_financeiro_mock_state', JSON.stringify(stateToPersist));
-      } catch (error) {
-        console.warn('Erro ao salvar estado no localStorage:', error);
-      }
+      // REMOVIDO: localStorage com dados financeiros sensíveis
+      // Os dados agora são persistidos via API backend com autenticação segura
+      console.log('[SECURITY] Financial data storage moved to secure backend - localStorage removed');
     };
 
-    // Salvar apenas se não estiver no estado inicial
-    if (state.accounts.length > 0 || state.categories.length > 0 || state.transactions.length > 0) {
-      savePersistedState();
-    }
-  }, [state.accounts, state.categories, state.transactions, state.creditCards, state.creditCardBills, state.budgets]);
+    // SEGURANÇA: Não fazer mais salvamento automático
+    // Dados são agora gerenciados pelo backend de forma segura
+  }, []);
 
   // ===== CARREGAMENTO AUTOMÁTICO DE DADOS =====
   

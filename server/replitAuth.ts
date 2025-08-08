@@ -26,6 +26,11 @@ const getOidcConfig = memoize(
 );
 
 export function getSession() {
+  // Validate SESSION_SECRET is present
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required for security');
+  }
+
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
@@ -35,7 +40,7 @@ export function getSession() {
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+    secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -138,14 +143,20 @@ export async function setupAuth(app: Express) {
     });
   } else {
     // Preview/Local: sessão em memória e rotas mock
+    // Validate SESSION_SECRET is present even for development
+    if (!process.env.SESSION_SECRET) {
+      throw new Error('SESSION_SECRET environment variable is required for security');
+    }
+    
     app.use(session({
-      secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: 'lax', // SEGURANÇA: Proteção CSRF para ambiente desenvolvimento
       },
     }));
 

@@ -4,12 +4,19 @@ export const creditCardSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
   type: z.enum(['CREDIT', 'DEBIT', 'CREDIT_DEBIT', 'PREPAID', 'VIRTUAL']),
   brand: z.enum(['VISA', 'MASTERCARD', 'ELO', 'AMEX', 'HIPERCARD', 'OTHER']),
-  last_digits: z.string().length(4, "Últimos 4 dígitos devem ter 4 caracteres").optional().or(z.literal("")),
+  last_digits: z.string()
+    .regex(/^\d{4}$/, "Últimos dígitos devem conter exatamente 4 números")
+    .optional()
+    .or(z.literal("")),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hexadecimal válido"),
   credit_limit: z.string().min(1, "Limite é obrigatório"),
   available_limit: z.string().min(1, "Limite disponível é obrigatório"),
-  closing_day: z.string().min(1, "Dia de fechamento é obrigatório"),
-  due_day: z.string().min(1, "Dia de vencimento é obrigatório"),
+  closing_day: z.string()
+    .regex(/^([1-9]|[12]\d|3[01])$/, "Dia de fechamento deve ser entre 1 e 31")
+    .min(1, "Dia de fechamento é obrigatório"),
+  due_day: z.string()
+    .regex(/^([1-9]|[12]\d|3[01])$/, "Dia de vencimento deve ser entre 1 e 31")  
+    .min(1, "Dia de vencimento é obrigatório"),
   is_default: z.boolean().default(false),
   is_virtual: z.boolean().default(false),
   parent_card_id: z.string().uuid().optional().nullable(),
