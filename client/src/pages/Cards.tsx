@@ -58,8 +58,8 @@ export default function Cards() {
         brand: data.brand,
         lastFourDigits: data.last_digits || undefined,
         color: data.color,
-        limit: parseFloat(data.credit_limit),
-        availableLimit: parseFloat(data.available_limit),
+        limit: data.credit_limit, // Keep as string for decimal validation
+        availableLimit: data.available_limit, // Keep as string for decimal validation
         closingDay: parseInt(data.closing_day),
         dueDay: parseInt(data.due_day),
         isDefault: data.is_default,
