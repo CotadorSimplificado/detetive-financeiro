@@ -5,6 +5,9 @@ import { CustomBarChart } from "../charts/BarChart";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, PiggyBank } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useMockStore } from "@/data/store/mockContext";
+import { SkeletonCard } from "@/components/ui/skeleton-card";
+import { formatCurrency } from "@/lib/currency-utils";
 
 // Mock data - in real app, this would come from your backend
 const expenseData = [
@@ -38,16 +41,58 @@ const cashFlowData = [
 ];
 
 export const DashboardCards = () => {
-  const totalBalance = 6790.42;
-  const monthlyIncome = 10210.00;
-  const monthlyExpenses = 8698.63;
-  const monthlyBalance = monthlyIncome - monthlyExpenses;
-  const creditCardUsed = 1042.05;
-  const creditCardLimit = 5000.00;
-  const creditCardPercentage = (creditCardUsed / creditCardLimit) * 100;
+  const { 
+    accounts, 
+    accountsLoading, 
+    creditCards, 
+    creditCardsLoading,
+    transactions,
+    transactionsLoading,
+    getTotalBalance,
+    getTotalCreditLimit,
+    getTotalAvailableLimit,
+    isAuthenticated,
+    loading
+  } = useMockStore();
+
+  // Se ainda está carregando dados de autenticação
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  const totalBalance = getTotalBalance();
+  const totalCreditLimit = getTotalCreditLimit();
+  const totalAvailableLimit = getTotalAvailableLimit();
+  const creditCardUsed = totalCreditLimit - totalAvailableLimit;
+  const creditCardPercentage = totalCreditLimit > 0 ? (creditCardUsed / totalCreditLimit) * 100 : 0;
   
+  // Calcular receitas e despesas do mês atual
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const currentMonthTransactions = transactions.filter(t => {
+    const date = new Date(t.date);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
+  
+  const monthlyIncome = currentMonthTransactions
+    .filter(t => t.type === 'INCOME')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const monthlyExpenses = currentMonthTransactions
+    .filter(t => t.type === 'EXPENSE')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const monthlyBalance = monthlyIncome - monthlyExpenses;
+  
+  // Meta de economia (valores mock - idealmente viriam de preferências do usuário)
   const savingsGoal = 20000;
-  const currentSavings = 12500;
+  const currentSavings = totalBalance * 0.6; // Simular que 60% do saldo é poupança
   const savingsProgress = (currentSavings / savingsGoal) * 100;
 
   return (
@@ -55,11 +100,11 @@ export const DashboardCards = () => {
       {/* Saldo Total */}
       <FinancialCard
         title="Saldo Total"
-        value={`R$ ${totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+        value={formatCurrency(totalBalance)}
         subtitle="Saldo consolidado em contas"
         variant="balance"
-        trend="up"
-        trendValue="+R$ 350,00 este mês"
+        trend={monthlyBalance >= 0 ? "up" : "down"}
+        trendValue={`${monthlyBalance >= 0 ? '+' : ''}${formatCurrency(monthlyBalance)} este mês`}
         icon={<DollarSign className="h-5 w-5" />}
       />
 
@@ -76,7 +121,7 @@ export const DashboardCards = () => {
               <span className="text-sm text-muted-foreground">Receitas</span>
             </div>
             <span className="text-sm font-semibold text-income">
-              R$ {monthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatCurrency(monthlyIncome)}
             </span>
           </div>
           <div className="flex items-center justify-between">
@@ -85,14 +130,14 @@ export const DashboardCards = () => {
               <span className="text-sm text-muted-foreground">Despesas</span>
             </div>
             <span className="text-sm font-semibold text-expense">
-              R$ {monthlyExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatCurrency(monthlyExpenses)}
             </span>
           </div>
           <div className="pt-2 border-t border-border">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Balanço</span>
               <span className={`text-sm font-bold ${monthlyBalance >= 0 ? 'text-income' : 'text-expense'}`}>
-                R$ {monthlyBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(monthlyBalance)}
               </span>
             </div>
           </div>
@@ -109,7 +154,7 @@ export const DashboardCards = () => {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Fatura Atual</span>
             <span className="text-lg font-bold text-warning">
-              R$ {creditCardUsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatCurrency(creditCardUsed)}
             </span>
           </div>
           <div className="space-y-2">
@@ -120,7 +165,7 @@ export const DashboardCards = () => {
             <Progress value={creditCardPercentage} className="h-2" />
           </div>
           <div className="text-xs text-muted-foreground">
-            Limite disponível: R$ {(creditCardLimit - creditCardUsed).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            Limite disponível: {formatCurrency(totalAvailableLimit)}
           </div>
         </div>
       </FinancialCard>
@@ -139,7 +184,7 @@ export const DashboardCards = () => {
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Total</div>
               <div className="text-lg font-bold text-foreground">
-                R$ {expenseData.reduce((sum, item) => sum + item.value, 0).toLocaleString('pt-BR')}
+                {formatCurrency(expenseData.reduce((sum, item) => sum + item.value, 0))}
               </div>
             </div>
           }
@@ -151,7 +196,7 @@ export const DashboardCards = () => {
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-xs text-muted-foreground">{item.name}</span>
               </div>
-              <span className="text-xs font-semibold">R$ {item.value.toLocaleString('pt-BR')}</span>
+              <span className="text-xs font-semibold">{formatCurrency(item.value)}</span>
             </div>
           ))}
         </div>
@@ -171,14 +216,14 @@ export const DashboardCards = () => {
           <Progress value={savingsProgress} className="h-3" />
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              R$ {currentSavings.toLocaleString('pt-BR')}
+              {formatCurrency(currentSavings)}
             </span>
             <span className="text-muted-foreground">
-              R$ {savingsGoal.toLocaleString('pt-BR')}
+              {formatCurrency(savingsGoal)}
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
-            Faltam R$ {(savingsGoal - currentSavings).toLocaleString('pt-BR')} para atingir a meta
+            Faltam {formatCurrency(savingsGoal - currentSavings)} para atingir a meta
           </div>
         </div>
       </FinancialCard>

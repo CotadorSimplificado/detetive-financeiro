@@ -373,6 +373,26 @@ export const MockProvider: React.FC<MockProviderProps> = ({ children }) => {
 
   // ===== PERSISTÊNCIA LOCAL =====
   
+  // Sincronizar estado de autenticação com MockStore na inicialização
+  useEffect(() => {
+    const syncAuthState = () => {
+      const currentUser = mockStore.getCurrentUser();
+      const currentSession = mockStore.getCurrentSession();
+      
+      if (currentUser && currentSession) {
+        dispatch({ type: 'SET_USER', payload: currentUser });
+        dispatch({ type: 'SET_SESSION', payload: currentSession });
+        dispatch({ type: 'SET_AUTHENTICATED', payload: true });
+        console.log('Estado de autenticação sincronizado:', currentUser.full_name);
+      }
+      
+      // Sempre definir loading como false após verificar
+      dispatch({ type: 'SET_LOADING', payload: false });
+    };
+
+    syncAuthState();
+  }, []);
+  
   // Carregar estado do localStorage na inicialização
   useEffect(() => {
     const loadPersistedState = () => {
