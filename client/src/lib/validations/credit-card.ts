@@ -6,10 +6,10 @@ export const creditCardSchema = z.object({
   brand: z.enum(['VISA', 'MASTERCARD', 'ELO', 'AMEX', 'HIPERCARD', 'OTHER']),
   last_digits: z.string().length(4, "Últimos 4 dígitos devem ter 4 caracteres").optional().or(z.literal("")),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hexadecimal válido"),
-  credit_limit: z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0, "Limite deve ser positivo")),
-  available_limit: z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0, "Limite disponível deve ser positivo")),
-  closing_day: z.string().transform((val) => parseInt(val)).pipe(z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31")),
-  due_day: z.string().transform((val) => parseInt(val)).pipe(z.number().min(1, "Dia deve ser entre 1 e 31").max(31, "Dia deve ser entre 1 e 31")),
+  credit_limit: z.string().min(1, "Limite é obrigatório"),
+  available_limit: z.string().min(1, "Limite disponível é obrigatório"),
+  closing_day: z.string().min(1, "Dia de fechamento é obrigatório"),
+  due_day: z.string().min(1, "Dia de vencimento é obrigatório"),
   is_default: z.boolean().default(false),
   is_virtual: z.boolean().default(false),
   parent_card_id: z.string().uuid().optional().nullable(),
@@ -25,10 +25,10 @@ export const creditCardSchema = z.object({
 }).refine((data) => {
   // Se for cartão de crédito, deve ter limite e dias de fechamento/vencimento
   if ((data.type === 'CREDIT' || data.type === 'CREDIT_DEBIT')) {
-    if (data.credit_limit === undefined || data.credit_limit === null) return false;
-    if (data.available_limit === undefined || data.available_limit === null) return false;
-    if (!data.closing_day) return false;
-    if (!data.due_day) return false;
+    if (!data.credit_limit || data.credit_limit.trim() === '') return false;
+    if (!data.available_limit || data.available_limit.trim() === '') return false;
+    if (!data.closing_day || data.closing_day.trim() === '') return false;
+    if (!data.due_day || data.due_day.trim() === '') return false;
   }
   return true;
 }, {

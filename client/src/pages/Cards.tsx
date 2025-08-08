@@ -13,6 +13,7 @@ import { CreditCardCard } from "@/components/cards/CreditCardCard";
 import { CreditCardModal } from "@/components/cards/CreditCardModal";
 import { CreditCardFormData } from "@/lib/validations/credit-card";
 import { formatCurrency } from "@/lib/currency-utils";
+import { parseCurrencyInput } from "@/lib/currency-format";
 import { useNavigate } from "react-router-dom";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
 
@@ -58,8 +59,8 @@ export default function Cards() {
         brand: data.brand,
         lastFourDigits: data.last_digits || undefined,
         color: data.color,
-        limit: data.credit_limit, // Keep as string for decimal validation
-        availableLimit: data.available_limit, // Keep as string for decimal validation
+        limit: parseCurrencyInput(data.credit_limit), // Convert Brazilian format to DB format
+        availableLimit: parseCurrencyInput(data.available_limit), // Convert Brazilian format to DB format
         closingDay: parseInt(data.closing_day),
         dueDay: parseInt(data.due_day),
         isDefault: data.is_default,

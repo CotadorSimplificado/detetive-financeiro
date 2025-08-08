@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { creditCardSchema, CreditCardFormData } from "@/lib/validations/credit-card";
 import { CreditCard } from "@/hooks/useCreditCards";
+import { formatCurrencyInput } from "@/lib/currency-format";
 
 interface CreditCardFormProps {
   onSubmit: (data: CreditCardFormData) => void;
@@ -43,8 +44,8 @@ export function CreditCardForm({
       brand: defaultValues?.brand || "OTHER",
       last_digits: defaultValues?.last_digits || "",
       color: defaultValues?.color || "#2563eb",
-      credit_limit: defaultValues?.credit_limit?.toString() || "0",
-      available_limit: defaultValues?.available_limit?.toString() || "0",
+      credit_limit: defaultValues?.credit_limit ? formatCurrencyInput(defaultValues.credit_limit) : "0,00",
+      available_limit: defaultValues?.available_limit ? formatCurrencyInput(defaultValues.available_limit) : "0,00",
       closing_day: defaultValues?.closing_day?.toString() || "1",
       due_day: defaultValues?.due_day?.toString() || "1",
       is_default: defaultValues?.is_default || false,
@@ -188,10 +189,14 @@ export function CreditCardForm({
                       <FormLabel>Limite de Crédito</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          step="0.01"
                           placeholder="0,00"
                           {...field}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Allow only numbers, dots, commas and spaces for Brazilian format
+                            const cleanValue = value.replace(/[^\d.,\s]/g, '');
+                            field.onChange(cleanValue);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -207,10 +212,14 @@ export function CreditCardForm({
                       <FormLabel>Limite Disponível</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          step="0.01"
                           placeholder="0,00"
                           {...field}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Allow only numbers, dots, commas and spaces for Brazilian format
+                            const cleanValue = value.replace(/[^\d.,\s]/g, '');
+                            field.onChange(cleanValue);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
