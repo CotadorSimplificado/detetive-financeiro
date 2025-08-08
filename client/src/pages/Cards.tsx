@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, CreditCard as CreditCardIcon, Wallet, TrendingUp, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCreditCards, useCreateCreditCard, useUpdateCreditCard, useDeleteCreditCard } from "@/hooks/useCreditCards";
+import { useCreditCardBills } from "@/hooks/useCreditCardBills";
 import { CreditCardCard } from "@/components/cards/CreditCardCard";
 import { CreditCardModal } from "@/components/cards/CreditCardModal";
 import { CreditCardFormData } from "@/lib/validations/credit-card";
@@ -24,6 +25,7 @@ export default function Cards() {
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
   const { data: cards = [], isLoading } = useCreditCards();
+  const { data: bills = [] } = useCreditCardBills();
   const createCard = useCreateCreditCard();
   const updateCard = useUpdateCreditCard();
   const deleteCard = useDeleteCreditCard();
@@ -75,8 +77,17 @@ export default function Cards() {
     }
   };
 
-  const handleViewDetails = (id: string) => {
-    navigate(`/cards/${id}`);
+  const handleViewDetails = (cardId: string) => {
+    // Buscar a fatura atual/mais recente do cartão
+    const cardBills = bills.filter(bill => bill.credit_card_id === cardId);
+    const currentBill = cardBills.find(bill => !bill.is_paid) || cardBills[0];
+    
+    if (currentBill) {
+      navigate(`/bills/${currentBill.id}`);
+    } else {
+      // Se não houver faturas, pode mostrar uma mensagem ou criar uma fatura
+      console.log('Nenhuma fatura encontrada para este cartão');
+    }
   };
 
   const handleSetDefault = async (id: string) => {
