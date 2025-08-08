@@ -82,7 +82,7 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange, onNew
   return (
     <>
       <LoadingOverlay isVisible={isTransitioning} message="Navegando..." />
-      
+
       <div className={cn("pb-12 w-64", className)}>
         <div className="space-y-4 py-4">
           {/* Logo Section */}
@@ -123,7 +123,7 @@ export const Sidebar = ({ className, activeTab = "dashboard", onTabChange, onNew
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
-                  
+
                   return (
                     <Button
                       key={item.id}
