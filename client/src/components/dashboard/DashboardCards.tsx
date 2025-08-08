@@ -5,11 +5,13 @@ import { CustomBarChart } from "../charts/BarChart";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Target, PiggyBank, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useMockStore } from "@/data/store/mockContext";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { formatCurrency } from "@/lib/currency-utils";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useAccounts } from '@/hooks/useAccounts';
+import { useTransactions } from '@/hooks/useTransactions';
+import { useCreditCards } from '@/hooks/useCreditCards';
 import { useCreditCardBills } from '@/hooks/useCreditCardBills';
 import { useMonthlyPlan } from '@/hooks/useMonthlyPlan';
 
@@ -45,25 +47,14 @@ const cashFlowData = [
 ];
 
 export const DashboardCards = () => {
-  const { 
-    accounts, 
-    accountsLoading, 
-    creditCards, 
-    creditCardsLoading,
-    transactions,
-    transactionsLoading,
-    getTotalBalance,
-    getTotalCreditLimit,
-    getTotalAvailableLimit,
-    isAuthenticated,
-    loading
-  } = useMockStore();
-
+  const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
+  const { data: transactions = [], isLoading: transactionsLoading } = useTransactions();
+  const { data: creditCards = [], isLoading: creditCardsLoading } = useCreditCards();
   const { data: bills = [] } = useCreditCardBills();
   const { planSummary } = useMonthlyPlan();
 
-  // Se ainda está carregando dados de autenticação
-  if (loading || !isAuthenticated) {
+  // Se ainda está carregando dados principais
+  if (accountsLoading || transactionsLoading || creditCardsLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -72,6 +63,19 @@ export const DashboardCards = () => {
       </div>
     );
   }
+
+  // Funções de cálculo usando dados reais da API
+  const getTotalBalance = () => {
+    return accounts.reduce((total, account) => total + (account.balance || 0), 0);
+  };
+
+  const getTotalCreditLimit = () => {
+    return creditCards.reduce((total, card) => total + (card.creditLimit || 0), 0);
+  };
+
+  const getTotalAvailableLimit = () => {
+    return creditCards.reduce((total, card) => total + (card.availableLimit || 0), 0);
+  };
 
   const totalBalance = getTotalBalance();
   const totalCreditLimit = getTotalCreditLimit();
