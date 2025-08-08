@@ -40,7 +40,7 @@ export function useCurrencyInput({
       setNumericValue(limited);
       onChange?.(limited);
     }
-  }, [displayValue, maxValue, onChange, numericValue]);
+  }, [displayValue, maxValue]); // Removido numericValue e onChange para evitar loop
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
@@ -54,15 +54,19 @@ export function useCurrencyInput({
     const masked = applyCurrencyMask(newValue, displayValue);
     setDisplayValue(masked);
     
-    // Restaura a posição do cursor após a máscara
-    requestAnimationFrame(() => {
+    // Atualiza o valor numérico imediatamente
+    const parsed = parseCurrency(masked);
+    const limited = Math.min(Math.max(0, parsed), maxValue);
+    setNumericValue(limited);
+    onChange?.(limited);
+    
+    // Simplificado: deixa o cursor no final
+    setTimeout(() => {
       if (input && document.activeElement === input) {
-        const lengthDiff = masked.length - newValue.length;
-        const newPosition = Math.max(0, cursorPosition + lengthDiff);
-        input.setSelectionRange(newPosition, newPosition);
+        input.setSelectionRange(masked.length, masked.length);
       }
-    });
-  }, [displayValue]);
+    }, 0);
+  }, [displayValue, maxValue, onChange]);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);

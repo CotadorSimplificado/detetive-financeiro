@@ -97,8 +97,16 @@ export function applyCurrencyMask(value: string, previousValue: string = ''): st
   
   if (!numbers) return '';
   
-  // Converte para centavos e depois para reais
-  const amount = parseInt(numbers) / 100;
+  // Se o número é muito pequeno, trata como centavos
+  if (numbers.length <= 2) {
+    const amount = parseInt(numbers) / 100;
+    return formatCurrencyInput(amount);
+  }
+  
+  // Para números maiores, trata os últimos 2 dígitos como centavos
+  const reais = numbers.slice(0, -2);
+  const centavos = numbers.slice(-2);
+  const amount = parseInt(reais || '0') + parseInt(centavos) / 100;
   
   return formatCurrencyInput(amount);
 }
