@@ -866,6 +866,29 @@ console.log({
 - ✅ Sanitizar inputs com Zod
 - ✅ HTTPS obrigatório (Replit fornece)
 
+## Padrão de inputs e payloads monetários
+
+Para todos os campos e endpoints que manipulam valores de dinheiro:
+
+- **Frontend**: a entrada deve ser autoformatada enquanto digita usando `useCurrencyInput`, exibindo número no padrão `pt-BR` (ex.: `1.234,56`), mas enviando ao backend o valor numérico em ponto flutuante (ex.: `1234.56`).
+- **Payloads**: o campo deve ser enviado como número (JSON number) sem símbolos de moeda, por exemplo:
+
+```json
+{
+  "description": "Almoço",
+  "amount": 45.90,
+  "type": "EXPENSE",
+  "date": "2025-01-10",
+  "categoryId": "...",
+  "accountId": "..."
+}
+```
+
+- **Validação**: no backend, validar com Zod que `amount` é um número ≥ 0 e limitar a precisão a 2 casas decimais ao persistir (colunas `decimal(10,2)`). Rejeitar strings do tipo `"R$ 10,00"`.
+- **Conversões**: evitar conversões implícitas de localidade. Tratar sempre como decimal de base 10 com duas casas (ex.: usar `Number(value.toFixed(2))` quando apropriado antes de persistir/calcular).
+
+Essas regras garantem UX consistente no cliente e dados padronizados no servidor.
+
 ## Conclusão
 
 Este plano fornece um caminho claro e testado para migrar o Detetive Financeiro de um protótipo com dados mock para uma aplicação de produção completa. A abordagem incremental minimiza riscos e permite validação contínua.
