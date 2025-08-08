@@ -9,8 +9,7 @@ import { MockProvider } from "@/data/store/mockContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import ReplitLogin from "./pages/ReplitLogin";
+import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Accounts from "./pages/Accounts";
@@ -22,10 +21,10 @@ import Reports from './pages/Reports';
 import Budgets from './pages/Budgets';
 
 const RootComponent = () => {
-  const { isAuthenticated, isLoading, error } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   // Se está carregando pela primeira vez, mostra loading
-  if (isLoading && !error) {
+  if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
@@ -34,9 +33,9 @@ const RootComponent = () => {
     </div>;
   }
 
-  // Se não está autenticado ou houve erro 401, mostra login
-  if (!isAuthenticated || error) {
-    return <ReplitLogin />;
+  // Se não está autenticado, mostra login
+  if (!isAuthenticated) {
+    return <Login />;
   }
 
   return <Home />;
@@ -51,8 +50,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/login" element={<ReplitLogin />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<RootComponent />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
