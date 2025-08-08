@@ -19,7 +19,7 @@ export default function Accounts() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
-  const { data: accounts = [], isLoading, error } = useAccounts();
+  const { data: accounts = [], loading, error } = useAccounts();
 
   // Memoiza os cálculos pesados
   const { filteredAccounts, totalBalance } = useMemo(() => {
@@ -61,7 +61,7 @@ export default function Accounts() {
     return (
       <MainLayout onNewTransaction={() => setTransactionModalOpen(true)}>
         <div className="flex items-center justify-center h-64">
-          <p className="text-destructive">Erro ao carregar contas: {error.message}</p>
+          <p className="text-destructive">Erro ao carregar contas: {String(error)}</p>
         </div>
       </MainLayout>
     );
@@ -115,10 +115,7 @@ export default function Accounts() {
             
             <Select value={typeFilter || "all"} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue />
-                </div>
+                <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os tipos</SelectItem>
@@ -132,7 +129,7 @@ export default function Accounts() {
           </div>
 
           {/* Accounts Grid */}
-          {isLoading ? (
+          {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i} />
