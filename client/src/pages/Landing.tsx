@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, CreditCard, PieChart } from "lucide-react";
+import { AuthStatus } from "@/components/auth/AuthStatus";
 
 export default function Landing() {
   return (
@@ -17,7 +18,10 @@ export default function Landing() {
           <Button 
             size="lg" 
             className="text-lg px-8 py-4"
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => {
+              // Abrir em nova aba para melhor experiência de auth
+              window.open('/api/login', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            }}
             data-testid="button-login"
           >
             Entrar com Replit
@@ -75,6 +79,11 @@ export default function Landing() {
           </Card>
         </div>
 
+        {/* Auth Status Section */}
+        <div className="mb-16">
+          <AuthStatus />
+        </div>
+
         {/* CTA Section */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -86,7 +95,10 @@ export default function Landing() {
           <Button 
             size="lg" 
             variant="outline"
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => {
+              // Abrir em nova aba para melhor experiência de auth
+              window.open('/api/login', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            }}
             data-testid="button-cta-login"
           >
             Começar Investigação
