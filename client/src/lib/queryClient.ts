@@ -50,12 +50,17 @@ export async function apiRequest(
     if (response.status === 204) {
       return null;
     }
+    
+    // Tratamento especial para 401 - não lançar erro, retornar null
+    if (response.status === 401 && endpoint.includes('/api/auth/user')) {
+      return null;
+    }
 
     const data = await response.json();
 
     if (!response.ok) {
       const error = new Error(
-        data.error || `${response.status}: ${response.statusText}`
+        data.error || data.message || `${response.status}: ${response.statusText}`
       );
       (error as any).status = response.status;
       (error as any).details = data.details;

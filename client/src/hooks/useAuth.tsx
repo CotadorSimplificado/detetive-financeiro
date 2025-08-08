@@ -3,7 +3,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@/types/auth";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery<User>({
+  const { data: user, isLoading } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     queryFn: () => apiRequest("/api/auth/user"),
     retry: false,
@@ -13,10 +13,10 @@ export function useAuth() {
   });
 
   return {
-    user,
+    user: user || null,
     isLoading,
     isAuthenticated: !!user,
-    error,
+    error: null,
   };
 }
 
