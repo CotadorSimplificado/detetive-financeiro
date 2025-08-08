@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth, setupAuthRoutes } from "./auth";
+import { validateEncryptionSetup } from "./encryption";
 
 // ===== SEGURANÇA - SANITIZAÇÃO DE LOGS =====
 
@@ -177,6 +178,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // ===== VALIDAR CONFIGURAÇÃO DE CRIPTOGRAFIA =====
+  log("🔐 Validating data encryption setup...");
+  if (!validateEncryptionSetup()) {
+    console.error("❌ ENCRYPTION SETUP FAILED - Server cannot start without proper encryption configuration");
+    console.error("Please set ENCRYPTION_KEY environment variable with a secure key");
+    process.exit(1);
+  }
+  log("✅ Data encryption validation successful");
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

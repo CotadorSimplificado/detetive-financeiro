@@ -32,6 +32,12 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, isNull, or } from "drizzle-orm";
+import { 
+  encryptObjectFields, 
+  decryptObjectFields, 
+  SENSITIVE_FIELDS,
+  validateEncryptionSetup 
+} from "./encryption";
 
 // Interface para operações de storage
 export interface IStorage {
@@ -82,6 +88,13 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   
+  constructor() {
+    // Validar configuração de criptografia na inicialização
+    if (!validateEncryptionSetup()) {
+      throw new Error('Encryption setup validation failed - check ENCRYPTION_KEY environment variable');
+    }
+  }
+  
   // ===============================
   // USER OPERATIONS
   // ===============================
@@ -121,11 +134,16 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(accounts.isActive, filters.isActive));
     }
     
-    return await db
+    const accountsData = await db
       .select()
       .from(accounts)
       .where(and(...conditions))
       .orderBy(desc(accounts.createdAt));
+    
+    // Descriptografar dados sensíveis
+    return accountsData.map(account => 
+      decryptObjectFields(account, SENSITIVE_FIELDS.ACCOUNT)
+    );
   }
 
   async getAccount(id: string, userId: string): Promise<Account | undefined> {
@@ -133,21 +151,30 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(accounts)
       .where(and(eq(accounts.id, id), eq(accounts.userId, userId)));
-    return account;
+    
+    return account ? decryptObjectFields(account, SENSITIVE_FIELDS.ACCOUNT) : undefined;
   }
 
   async createAccount(account: CreateAccount): Promise<Account> {
-    const [newAccount] = await db.insert(accounts).values(account).returning();
-    return newAccount;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedAccount = encryptObjectFields(account, SENSITIVE_FIELDS.ACCOUNT);
+    const [newAccount] = await db.insert(accounts).values(encryptedAccount).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newAccount, SENSITIVE_FIELDS.ACCOUNT);
   }
 
   async updateAccount(id: string, userId: string, account: UpdateAccount): Promise<Account> {
+    // Criptografar apenas os campos sensíveis que estão sendo atualizados
+    const encryptedUpdates = encryptObjectFields(account, SENSITIVE_FIELDS.ACCOUNT);
     const [updatedAccount] = await db
       .update(accounts)
-      .set({ ...account, updatedAt: new Date() })
+      .set({ ...encryptedUpdates, updatedAt: new Date() })
       .where(and(eq(accounts.id, id), eq(accounts.userId, userId)))
       .returning();
-    return updatedAccount;
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(updatedAccount, SENSITIVE_FIELDS.ACCOUNT);
   }
 
   async deleteAccount(id: string, userId: string): Promise<void> {
@@ -225,11 +252,16 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(transactions.creditCardId, filters.creditCardId));
     }
     
-    return await db
+    const transactionsData = await db
       .select()
       .from(transactions)
       .where(and(...conditions))
       .orderBy(desc(transactions.date), desc(transactions.createdAt));
+    
+    // Descriptografar dados sensíveis
+    return transactionsData.map(transaction => 
+      decryptObjectFields(transaction, SENSITIVE_FIELDS.TRANSACTION)
+    );
   }
 
   async getTransaction(id: string, userId: string): Promise<Transaction | undefined> {
@@ -237,21 +269,30 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
-    return transaction;
+    
+    return transaction ? decryptObjectFields(transaction, SENSITIVE_FIELDS.TRANSACTION) : undefined;
   }
 
   async createTransaction(transaction: CreateTransaction): Promise<Transaction> {
-    const [newTransaction] = await db.insert(transactions).values(transaction).returning();
-    return newTransaction;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedTransaction = encryptObjectFields(transaction, SENSITIVE_FIELDS.TRANSACTION);
+    const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newTransaction, SENSITIVE_FIELDS.TRANSACTION);
   }
 
   async updateTransaction(id: string, userId: string, transaction: UpdateTransaction): Promise<Transaction> {
+    // Criptografar apenas os campos sensíveis que estão sendo atualizados
+    const encryptedUpdates = encryptObjectFields(transaction, SENSITIVE_FIELDS.TRANSACTION);
     const [updatedTransaction] = await db
       .update(transactions)
-      .set({ ...transaction, updatedAt: new Date() })
+      .set({ ...encryptedUpdates, updatedAt: new Date() })
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
       .returning();
-    return updatedTransaction;
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(updatedTransaction, SENSITIVE_FIELDS.TRANSACTION);
   }
 
   async deleteTransaction(id: string, userId: string): Promise<void> {
@@ -265,11 +306,16 @@ export class DatabaseStorage implements IStorage {
   // ===============================
   
   async getCreditCards(userId: string): Promise<CreditCard[]> {
-    return await db
+    const creditCardsData = await db
       .select()
       .from(creditCards)
       .where(eq(creditCards.userId, userId))
       .orderBy(desc(creditCards.createdAt));
+    
+    // Descriptografar dados sensíveis
+    return creditCardsData.map(creditCard => 
+      decryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD)
+    );
   }
 
   async getCreditCard(id: string, userId: string): Promise<CreditCard | undefined> {
@@ -277,21 +323,30 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(creditCards)
       .where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)));
-    return creditCard;
+    
+    return creditCard ? decryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD) : undefined;
   }
 
   async createCreditCard(creditCard: CreateCreditCard): Promise<CreditCard> {
-    const [newCreditCard] = await db.insert(creditCards).values(creditCard).returning();
-    return newCreditCard;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedCreditCard = encryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD);
+    const [newCreditCard] = await db.insert(creditCards).values(encryptedCreditCard).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newCreditCard, SENSITIVE_FIELDS.CREDIT_CARD);
   }
 
   async updateCreditCard(id: string, userId: string, creditCard: UpdateCreditCard): Promise<CreditCard> {
+    // Criptografar apenas os campos sensíveis que estão sendo atualizados
+    const encryptedUpdates = encryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD);
     const [updatedCreditCard] = await db
       .update(creditCards)
-      .set({ ...creditCard, updatedAt: new Date() })
+      .set({ ...encryptedUpdates, updatedAt: new Date() })
       .where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)))
       .returning();
-    return updatedCreditCard;
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(updatedCreditCard, SENSITIVE_FIELDS.CREDIT_CARD);
   }
 
   async deleteCreditCard(id: string, userId: string): Promise<void> {
@@ -309,11 +364,16 @@ export class DatabaseStorage implements IStorage {
     const cardExists = await this.getCreditCard(creditCardId, userId);
     if (!cardExists) return [];
     
-    return await db
+    const billsData = await db
       .select()
       .from(creditCardBills)
       .where(eq(creditCardBills.creditCardId, creditCardId))
       .orderBy(desc(creditCardBills.year), desc(creditCardBills.month));
+    
+    // Descriptografar dados sensíveis
+    return billsData.map(bill => 
+      decryptObjectFields(bill, SENSITIVE_FIELDS.CREDIT_CARD_BILL)
+    );
   }
 
   async getCreditCardBill(id: string, userId: string): Promise<CreditCardBill | undefined> {
@@ -323,12 +383,17 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(creditCards, eq(creditCardBills.creditCardId, creditCards.id))
       .where(and(eq(creditCardBills.id, id), eq(creditCards.userId, userId)));
     
-    return bill?.credit_card_bills;
+    const billData = bill?.credit_card_bills;
+    return billData ? decryptObjectFields(billData, SENSITIVE_FIELDS.CREDIT_CARD_BILL) : undefined;
   }
 
   async createCreditCardBill(bill: CreateCreditCardBill): Promise<CreditCardBill> {
-    const [newBill] = await db.insert(creditCardBills).values(bill).returning();
-    return newBill;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedBill = encryptObjectFields(bill, SENSITIVE_FIELDS.CREDIT_CARD_BILL);
+    const [newBill] = await db.insert(creditCardBills).values(encryptedBill).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newBill, SENSITIVE_FIELDS.CREDIT_CARD_BILL);
   }
 
   // ===============================
@@ -336,11 +401,16 @@ export class DatabaseStorage implements IStorage {
   // ===============================
   
   async getMonthlyPlans(userId: string): Promise<MonthlyPlan[]> {
-    return await db
+    const plansData = await db
       .select()
       .from(monthlyPlans)
       .where(eq(monthlyPlans.userId, userId))
       .orderBy(desc(monthlyPlans.year), desc(monthlyPlans.month));
+    
+    // Descriptografar dados sensíveis
+    return plansData.map(plan => 
+      decryptObjectFields(plan, SENSITIVE_FIELDS.MONTHLY_PLAN)
+    );
   }
 
   async getMonthlyPlan(userId: string, month: number, year: number): Promise<MonthlyPlan | undefined> {
@@ -352,12 +422,17 @@ export class DatabaseStorage implements IStorage {
         eq(monthlyPlans.month, month),
         eq(monthlyPlans.year, year)
       ));
-    return plan;
+    
+    return plan ? decryptObjectFields(plan, SENSITIVE_FIELDS.MONTHLY_PLAN) : undefined;
   }
 
   async createMonthlyPlan(plan: CreateMonthlyPlan): Promise<MonthlyPlan> {
-    const [newPlan] = await db.insert(monthlyPlans).values(plan).returning();
-    return newPlan;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedPlan = encryptObjectFields(plan, SENSITIVE_FIELDS.MONTHLY_PLAN);
+    const [newPlan] = await db.insert(monthlyPlans).values(encryptedPlan).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newPlan, SENSITIVE_FIELDS.MONTHLY_PLAN);
   }
 
   // ===============================
@@ -365,64 +440,27 @@ export class DatabaseStorage implements IStorage {
   // ===============================
   
   async getCategoryBudgets(monthlyPlanId: string): Promise<CategoryBudget[]> {
-    return await db
+    const budgetsData = await db
       .select()
       .from(categoryBudgets)
       .where(eq(categoryBudgets.monthlyPlanId, monthlyPlanId))
       .orderBy(categoryBudgets.createdAt);
+    
+    // Descriptografar dados sensíveis
+    return budgetsData.map(budget => 
+      decryptObjectFields(budget, SENSITIVE_FIELDS.CATEGORY_BUDGET)
+    );
   }
 
   async createCategoryBudget(budget: CreateCategoryBudget): Promise<CategoryBudget> {
-    const [newBudget] = await db.insert(categoryBudgets).values(budget).returning();
-    return newBudget;
+    // Criptografar dados sensíveis antes de inserir
+    const encryptedBudget = encryptObjectFields(budget, SENSITIVE_FIELDS.CATEGORY_BUDGET);
+    const [newBudget] = await db.insert(categoryBudgets).values(encryptedBudget).returning();
+    
+    // Retornar dados descriptografados
+    return decryptObjectFields(newBudget, SENSITIVE_FIELDS.CATEGORY_BUDGET);
   }
 }
 
-// Manter MemStorage para compatibilidade durante a migração
-export class MemStorage implements IStorage {
-  // Legacy implementation - será removido após migração completa
-  async getUser(id: string): Promise<User | undefined> {
-    throw new Error("MemStorage deprecated - use DatabaseStorage");
-  }
-  
-  async upsertUser(user: UpsertUser): Promise<User> {
-    throw new Error("MemStorage deprecated - use DatabaseStorage");
-  }
-  
-  // Implementar métodos básicos para evitar quebrar a aplicação
-  async getAccounts(): Promise<Account[]> { return []; }
-  async getAccount(): Promise<Account | undefined> { return undefined; }
-  async createAccount(): Promise<Account> { throw new Error("Use DatabaseStorage"); }
-  async updateAccount(): Promise<Account> { throw new Error("Use DatabaseStorage"); }
-  async deleteAccount(): Promise<void> { throw new Error("Use DatabaseStorage"); }
-  
-  async getCategories(): Promise<Category[]> { return []; }
-  async getCategory(): Promise<Category | undefined> { return undefined; }
-  async createCategory(): Promise<Category> { throw new Error("Use DatabaseStorage"); }
-  
-  async getTransactions(): Promise<Transaction[]> { return []; }
-  async getTransaction(): Promise<Transaction | undefined> { return undefined; }
-  async createTransaction(): Promise<Transaction> { throw new Error("Use DatabaseStorage"); }
-  async updateTransaction(): Promise<Transaction> { throw new Error("Use DatabaseStorage"); }
-  async deleteTransaction(): Promise<void> { throw new Error("Use DatabaseStorage"); }
-  
-  async getCreditCards(): Promise<CreditCard[]> { return []; }
-  async getCreditCard(): Promise<CreditCard | undefined> { return undefined; }
-  async createCreditCard(): Promise<CreditCard> { throw new Error("Use DatabaseStorage"); }
-  async updateCreditCard(): Promise<CreditCard> { throw new Error("Use DatabaseStorage"); }
-  async deleteCreditCard(): Promise<void> { throw new Error("Use DatabaseStorage"); }
-  
-  async getCreditCardBills(): Promise<CreditCardBill[]> { return []; }
-  async getCreditCardBill(): Promise<CreditCardBill | undefined> { return undefined; }
-  async createCreditCardBill(): Promise<CreditCardBill> { throw new Error("Use DatabaseStorage"); }
-  
-  async getMonthlyPlans(): Promise<MonthlyPlan[]> { return []; }
-  async getMonthlyPlan(): Promise<MonthlyPlan | undefined> { return undefined; }
-  async createMonthlyPlan(): Promise<MonthlyPlan> { throw new Error("Use DatabaseStorage"); }
-  
-  async getCategoryBudgets(): Promise<CategoryBudget[]> { return []; }
-  async createCategoryBudget(): Promise<CategoryBudget> { throw new Error("Use DatabaseStorage"); }
-}
-
-// Export the storage instance - mudará para DatabaseStorage na migração final
+// Export the storage instance - using DatabaseStorage with encryption
 export const storage = new DatabaseStorage();

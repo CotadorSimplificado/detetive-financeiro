@@ -69,8 +69,8 @@ export const accounts = pgTable("accounts", {
   type: varchar("type").notNull(), // CHECKING, SAVINGS, INVESTMENT, CASH
   balance: decimal("balance", { precision: 12, scale: 2 }).notNull().default('0'),
   bankName: varchar("bank_name"),
-  accountNumber: varchar("account_number"),
-  agency: varchar("agency"),
+  accountNumber: text("account_number"), // Encrypted sensitive data
+  agency: text("agency"), // Encrypted sensitive data
   color: varchar("color"),
   isDefault: boolean("is_default").default(false),
   isActive: boolean("is_active").default(true),
@@ -92,7 +92,7 @@ export const creditCards = pgTable("credit_cards", {
   availableLimit: decimal("available_limit", { precision: 12, scale: 2 }).notNull(),
   closingDay: integer("closing_day").notNull(),
   dueDay: integer("due_day").notNull(),
-  lastFourDigits: varchar("last_four_digits", { length: 4 }),
+  lastFourDigits: text("last_four_digits"), // Encrypted sensitive data
   color: varchar("color"),
   isDefault: boolean("is_default").default(false),
   isActive: boolean("is_active").default(true),

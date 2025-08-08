@@ -30,12 +30,12 @@ const defaultFlags: FeatureFlags = {
 
   // Fase 4: Auth e features avançadas
   useRealAuth: true,
-  useRealBudgets: false,
-  useRealReports: false,
+  useRealBudgets: true,
+  useRealReports: true,
 
   // Debug ativo para validação
   debugMode: true,
-  parallelMode: false,
+  parallelMode: false, // Legacy - will be removed
 };
 
 // Storage key para localStorage
@@ -176,13 +176,13 @@ export const enableAllRealFeatures = () => {
     useRealBudgets: true,
     useRealReports: true,
     debugMode: true,
-    parallelMode: true,
+    parallelMode: false, // Mock system removed
   });
 };
 
 export const enableDebugMode = () => {
   featureFlags.enable('debugMode');
-  featureFlags.enable('parallelMode');
+  // Parallel mode removed - no longer needed
 };
 
 export type { FeatureFlags };
