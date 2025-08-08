@@ -82,15 +82,15 @@ export default function Reports() {
   // Calculate metrics
   const metrics = useMemo(() => {
     const income = filteredTransactions
-      .filter(t => t.type === TransactionType.INCOME)
+      .filter(t => t.type === 'INCOME')
       .reduce((sum, t) => sum + t.amount, 0);
     
     const expenses = filteredTransactions
-      .filter(t => t.type === TransactionType.EXPENSE || t.type === TransactionType.CREDIT_CARD_EXPENSE)
+      .filter(t => t.type === 'EXPENSE' || t.type === 'CREDIT_CARD_EXPENSE')
       .reduce((sum, t) => sum + t.amount, 0);
     
     const transfers = filteredTransactions
-      .filter(t => t.type === TransactionType.TRANSFER)
+      .filter(t => t.type === 'TRANSFER')
       .reduce((sum, t) => sum + t.amount, 0);
 
     return {
@@ -133,9 +133,9 @@ export default function Reports() {
         acc[month] = { month, income: 0, expenses: 0 };
       }
       
-      if (transaction.type === TransactionType.INCOME) {
+      if (transaction.type === 'INCOME') {
         acc[month].income += transaction.amount;
-      } else if (transaction.type === TransactionType.EXPENSE || transaction.type === TransactionType.CREDIT_CARD_EXPENSE) {
+      } else if (transaction.type === 'EXPENSE' || transaction.type === 'CREDIT_CARD_EXPENSE') {
         acc[month].expenses += transaction.amount;
       }
       
@@ -291,10 +291,10 @@ export default function Reports() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os tipos</SelectItem>
-                  <SelectItem value={TransactionType.INCOME}>Receitas</SelectItem>
-                  <SelectItem value={TransactionType.EXPENSE}>Despesas</SelectItem>
-                  <SelectItem value={TransactionType.CREDIT_CARD_EXPENSE}>Cartão de Crédito</SelectItem>
-                  <SelectItem value={TransactionType.TRANSFER}>Transferências</SelectItem>
+                  <SelectItem value="INCOME">Receitas</SelectItem>
+                  <SelectItem value="EXPENSE">Despesas</SelectItem>
+                  <SelectItem value="CREDIT_CARD_EXPENSE">Cartão de Crédito</SelectItem>
+                  <SelectItem value="TRANSFER">Transferências</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -456,13 +456,13 @@ export default function Reports() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{transaction.description}</span>
                       <Badge variant={
-                        transaction.type === TransactionType.INCOME ? 'default' :
-                        transaction.type === TransactionType.EXPENSE ? 'destructive' :
-                        transaction.type === TransactionType.CREDIT_CARD_EXPENSE ? 'secondary' : 'outline'
+                        transaction.type === 'INCOME' ? 'default' :
+                        transaction.type === 'EXPENSE' ? 'destructive' :
+                        transaction.type === 'CREDIT_CARD_EXPENSE' ? 'secondary' : 'outline'
                       }>
-                        {transaction.type === TransactionType.INCOME ? 'Receita' :
-                         transaction.type === TransactionType.EXPENSE ? 'Despesa' :
-                         transaction.type === TransactionType.CREDIT_CARD_EXPENSE ? 'Cartão' : 'Transferência'}
+                        {transaction.type === 'INCOME' ? 'Receita' :
+                         transaction.type === 'EXPENSE' ? 'Despesa' :
+                         transaction.type === 'CREDIT_CARD_EXPENSE' ? 'Cartão' : 'Transferência'}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
