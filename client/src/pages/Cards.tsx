@@ -51,12 +51,28 @@ export default function Cards() {
 
   const handleSubmit = async (data: CreditCardFormData) => {
     try {
+      // Transform frontend snake_case fields to backend camelCase fields
+      const transformedData = {
+        name: data.name,
+        type: data.type,
+        brand: data.brand,
+        lastFourDigits: data.last_digits || undefined,
+        color: data.color,
+        limit: parseFloat(data.credit_limit),
+        availableLimit: parseFloat(data.available_limit),
+        closingDay: parseInt(data.closing_day),
+        dueDay: parseInt(data.due_day),
+        isDefault: data.is_default,
+        isVirtual: data.is_virtual,
+        parentCardId: data.parent_card_id || undefined,
+      };
+
       if (editingCard) {
-        await updateCard.mutateAsync({ id: editingCard.id, ...data });
+        await updateCard.mutateAsync({ id: editingCard.id, ...transformedData });
       } else {
         await createCard.mutateAsync({
-          ...data,
-          is_active: true,
+          ...transformedData,
+          isActive: true,
         });
       }
       setIsModalOpen(false);

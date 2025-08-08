@@ -43,10 +43,10 @@ export function CreditCardForm({
       brand: defaultValues?.brand || "OTHER",
       last_digits: defaultValues?.last_digits || "",
       color: defaultValues?.color || "#2563eb",
-      credit_limit: defaultValues?.credit_limit || null,
-      available_limit: defaultValues?.available_limit || null,
-      closing_day: defaultValues?.closing_day || null,
-      due_day: defaultValues?.due_day || null,
+      credit_limit: defaultValues?.credit_limit?.toString() || "0",
+      available_limit: defaultValues?.available_limit?.toString() || "0",
+      closing_day: defaultValues?.closing_day?.toString() || "1",
+      due_day: defaultValues?.due_day?.toString() || "1",
       is_default: defaultValues?.is_default || false,
       is_virtual: defaultValues?.is_virtual || false,
       parent_card_id: defaultValues?.parent_card_id || null,
@@ -192,8 +192,6 @@ export function CreditCardForm({
                           step="0.01"
                           placeholder="0,00"
                           {...field}
-                          value={field.value || ""}
-                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -213,8 +211,6 @@ export function CreditCardForm({
                           step="0.01"
                           placeholder="0,00"
                           {...field}
-                          value={field.value || ""}
-                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -235,8 +231,6 @@ export function CreditCardForm({
                           max="31"
                           placeholder="15"
                           {...field}
-                          value={field.value || ""}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -257,8 +251,6 @@ export function CreditCardForm({
                           max="31"
                           placeholder="10"
                           {...field}
-                          value={field.value || ""}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
                         />
                       </FormControl>
                       <FormMessage />
