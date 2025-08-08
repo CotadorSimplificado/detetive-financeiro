@@ -149,7 +149,7 @@ export function PayBillModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <CreditCard className="h-5 w-5" />
+            <CreditCardIcon className="h-5 w-5" />
             <span>Pagar Fatura</span>
           </DialogTitle>
         </DialogHeader>
