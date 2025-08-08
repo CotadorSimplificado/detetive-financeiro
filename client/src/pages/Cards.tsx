@@ -14,6 +14,7 @@ import { CreditCardModal } from "@/components/cards/CreditCardModal";
 import { CreditCardFormData } from "@/lib/validations/credit-card";
 import { formatCurrency } from "@/lib/currency-utils";
 import { parseCurrencyInput } from "@/lib/currency-format";
+import { featureFlags } from "@/lib/featureFlags";
 import { useNavigate } from "react-router-dom";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
 
@@ -30,6 +31,15 @@ export default function Cards() {
   const createCard = useCreateCreditCard();
   const updateCard = useUpdateCreditCard();
   const deleteCard = useDeleteCreditCard();
+
+  if (featureFlags.isEnabled('debugMode')) {
+    console.log('🔍 Credit Cards Hooks Info:', {
+      useRealCreditCards: featureFlags.isEnabled('useRealCreditCards'),
+      cardsCount: cards.length,
+      isLoading,
+      updateCard: updateCard ? 'available' : 'unavailable'
+    });
+  }
 
   const filteredCards = cards.filter((card: any) => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -52,6 +62,28 @@ export default function Cards() {
 
   const handleSubmit = async (data: CreditCardFormData) => {
     try {
+      if (featureFlags.isEnabled('debugMode')) {
+        console.log('🚀 Form data recebida:', data);
+      }
+
+      // Convert currency values and validate
+      const limitValue = parseCurrencyInput(data.credit_limit);
+      const availableLimitValue = parseCurrencyInput(data.available_limit);
+
+      if (featureFlags.isEnabled('debugMode')) {
+        console.log('💰 Currency conversion:', {
+          credit_limit: data.credit_limit,
+          parsed_limit: limitValue,
+          parsed_limit_type: typeof limitValue,
+          available_limit: data.available_limit,
+          parsed_available: availableLimitValue,
+          parsed_available_type: typeof availableLimitValue,
+          // Test if parsable as numbers
+          limit_as_number: parseFloat(limitValue),
+          available_as_number: parseFloat(availableLimitValue)
+        });
+      }
+
       // Transform frontend snake_case fields to backend camelCase fields
       const transformedData = {
         name: data.name,
@@ -59,23 +91,51 @@ export default function Cards() {
         brand: data.brand,
         lastFourDigits: data.last_digits || undefined,
         color: data.color,
-        limit: parseCurrencyInput(data.credit_limit), // Convert Brazilian format to DB format
-        availableLimit: parseCurrencyInput(data.available_limit), // Convert Brazilian format to DB format
+        limit: limitValue, // Convert Brazilian format to DB format
+        availableLimit: availableLimitValue, // Convert Brazilian format to DB format
         closingDay: parseInt(data.closing_day),
         dueDay: parseInt(data.due_day),
         isDefault: data.is_default,
-        // Campos não suportados pelo backend atual foram removidos do payload
+        isActive: true, // Ensure card is active
       };
 
+      // Remove undefined values to avoid schema issues
+      const cleanedData = Object.fromEntries(
+        Object.entries(transformedData).filter(([_, value]) => value !== undefined)
+      );
+
+      if (featureFlags.isEnabled('debugMode')) {
+        console.log('🧹 Cleaned data (removing undefined):', {
+          original: transformedData,
+          cleaned: cleanedData,
+          removedFields: Object.keys(transformedData).filter(key => transformedData[key] === undefined)
+        });
+      }
+
       if (editingCard) {
-        await updateCard.mutateAsync({ id: editingCard.id, ...transformedData });
+        if (featureFlags.isEnabled('debugMode')) {
+          console.log('🔧 Atualizando cartão:', { 
+            id: editingCard.id, 
+            cleanedData,
+            payload: { id: editingCard.id, ...cleanedData }
+          });
+        }
+        await updateCard.mutateAsync({ id: editingCard.id, ...cleanedData });
       } else {
-        await createCard.mutateAsync(transformedData);
+        if (featureFlags.isEnabled('debugMode')) {
+          console.log('🔧 Criando novo cartão:', { cleanedData });
+        }
+        await createCard.mutateAsync(cleanedData);
       }
       setIsModalOpen(false);
       setEditingCard(null);
     } catch (error) {
-      console.error('Error saving card:', error);
+      console.error('❌ Error saving card:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
+      // Não fechar o modal em caso de erro para o usuário ver o que aconteceu
     }
   };
 

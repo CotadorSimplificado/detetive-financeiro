@@ -343,16 +343,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user!.id;
       const { id } = req.params;
+      
+      console.log("🔧 PUT /api/credit-cards/:id - Debug Info:", {
+        id,
+        userId,
+        body: req.body,
+        bodyKeys: Object.keys(req.body),
+        bodyTypes: Object.fromEntries(
+          Object.entries(req.body).map(([key, value]) => [key, typeof value])
+        )
+      });
+      
       const updateData = updateCreditCardSchema.parse(req.body);
+      console.log("✅ Schema validation passed:", updateData);
       
       const card = await storage.updateCreditCard(id, userId, updateData);
+      console.log("✅ Card updated successfully:", card);
       res.json(card);
     } catch (error: any) {
-      console.error("Error updating credit card:", error);
+      console.error("❌ Error updating credit card:", {
+        error: error.message,
+        stack: error.stack,
+        name: error.name,
+        cause: error.cause
+      });
+      
       if (error instanceof z.ZodError) {
+        console.error("❌ Zod validation errors:", error.errors);
         return res.status(400).json({ error: "Invalid credit card data", details: error.errors });
       }
-      res.status(500).json({ error: "Failed to update credit card" });
+      
+      res.status(500).json({ error: "Failed to update credit card", details: error.message });
     }
   });
 

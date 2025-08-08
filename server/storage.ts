@@ -337,16 +337,56 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCreditCard(id: string, userId: string, creditCard: UpdateCreditCard): Promise<CreditCard> {
-    // Criptografar apenas os campos sensíveis que estão sendo atualizados
-    const encryptedUpdates = encryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD);
-    const [updatedCreditCard] = await db
-      .update(creditCards)
-      .set({ ...encryptedUpdates, updatedAt: new Date() })
-      .where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)))
-      .returning();
-    
-    // Retornar dados descriptografados
-    return decryptObjectFields(updatedCreditCard, SENSITIVE_FIELDS.CREDIT_CARD);
+    try {
+      console.log("🔧 Storage: updateCreditCard called with:", {
+        id,
+        userId,
+        creditCard,
+        creditCardKeys: Object.keys(creditCard),
+        creditCardTypes: Object.fromEntries(
+          Object.entries(creditCard).map(([key, value]) => [key, typeof value])
+        )
+      });
+
+      // Criptografar apenas os campos sensíveis que estão sendo atualizados
+      const encryptedUpdates = encryptObjectFields(creditCard, SENSITIVE_FIELDS.CREDIT_CARD);
+      
+      console.log("🔒 After encryption:", {
+        original: creditCard,
+        encrypted: encryptedUpdates,
+        sensitiveFields: SENSITIVE_FIELDS.CREDIT_CARD
+      });
+
+      const updateData = { ...encryptedUpdates, updatedAt: new Date() };
+      console.log("📝 Final update data:", updateData);
+
+      const [updatedCreditCard] = await db
+        .update(creditCards)
+        .set(updateData)
+        .where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)))
+        .returning();
+      
+      if (!updatedCreditCard) {
+        throw new Error(`Credit card not found or user not authorized: ${id}`);
+      }
+
+      console.log("✅ Card updated in database:", updatedCreditCard);
+
+      // Retornar dados descriptografados
+      const result = decryptObjectFields(updatedCreditCard, SENSITIVE_FIELDS.CREDIT_CARD);
+      console.log("🔓 Final decrypted result:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("❌ Storage updateCreditCard error:", {
+        error: error.message,
+        stack: error.stack,
+        id,
+        userId,
+        creditCard
+      });
+      throw error;
+    }
   }
 
   async deleteCreditCard(id: string, userId: string): Promise<void> {

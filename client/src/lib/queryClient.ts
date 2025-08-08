@@ -43,6 +43,14 @@ export async function apiRequest(
     config.body = JSON.stringify(config.body);
   }
 
+  // Debug logging for credit card API requests
+  if (endpoint.includes('/credit-cards/')) {
+    console.log(`🌐 API Request: ${config.method || 'GET'} ${url}`, {
+      body: config.body ? JSON.parse(config.body as string) : null,
+      headers: config.headers
+    });
+  }
+
   try {
     const response = await fetch(url, config);
     

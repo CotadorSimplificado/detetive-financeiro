@@ -109,7 +109,7 @@ export function decryptBankingData(encryptedData: string): string {
 export const SENSITIVE_FIELDS = {
   ACCOUNT: ['accountNumber', 'agency'], // Dados bancários sensíveis
   TRANSACTION: [], // Sem criptografia por ora (valores financeiros ficam como decimal)
-  CREDIT_CARD: ['lastFourDigits'], // Apenas últimos dígitos por questões de segurança
+  CREDIT_CARD: [], // lastFourDigits não precisa ser criptografado - são intencionalmente exibidos
   CREDIT_CARD_BILL: [], // Valores financeiros ficam como decimal
   MONTHLY_PLAN: [], // Valores financeiros ficam como decimal  
   CATEGORY_BUDGET: [] // Valores financeiros ficam como decimal

@@ -70,8 +70,16 @@ export function CreditCardForm({
         color: (defaultValues as any)?.color || "#2563eb",
         // Mapear limit do backend para credit_limit do frontend
         credit_limit: (() => {
+          // Backend pode enviar limit, credit_limit, ou values como decimal string
           const backendLimit = (defaultValues as any)?.limit || (defaultValues as any)?.credit_limit;
-          if (backendLimit) {
+          if (featureFlags.isEnabled('debugMode')) {
+            console.log('🎯 Debug limit field:', { 
+              defaultValues, 
+              backendLimit,
+              type: typeof backendLimit 
+            });
+          }
+          if (backendLimit !== undefined && backendLimit !== null) {
             const formatted = formatCurrencyInput(backendLimit);
             if (featureFlags.isEnabled('debugMode')) {
               console.log('🎯 Formatando limit:', { original: backendLimit, formatted });
@@ -82,8 +90,16 @@ export function CreditCardForm({
         })(),
         // Mapear availableLimit do backend para available_limit do frontend
         available_limit: (() => {
+          // Backend pode enviar availableLimit, available_limit, ou values como decimal string
           const backendAvailable = (defaultValues as any)?.availableLimit || (defaultValues as any)?.available_limit;
-          if (backendAvailable) {
+          if (featureFlags.isEnabled('debugMode')) {
+            console.log('🎯 Debug available_limit field:', { 
+              defaultValues, 
+              backendAvailable,
+              type: typeof backendAvailable 
+            });
+          }
+          if (backendAvailable !== undefined && backendAvailable !== null) {
             const formatted = formatCurrencyInput(backendAvailable);
             if (featureFlags.isEnabled('debugMode')) {
               console.log('🎯 Formatando availableLimit:', { original: backendAvailable, formatted });

@@ -92,7 +92,7 @@ export const creditCards = pgTable("credit_cards", {
   availableLimit: decimal("available_limit", { precision: 12, scale: 2 }).notNull(),
   closingDay: integer("closing_day").notNull(),
   dueDay: integer("due_day").notNull(),
-  lastFourDigits: text("last_four_digits"), // Encrypted sensitive data
+  lastFourDigits: varchar("last_four_digits", { length: 4 }), // Últimos 4 dígitos do cartão
   color: varchar("color"),
   isDefault: boolean("is_default").default(false),
   isActive: boolean("is_active").default(true),

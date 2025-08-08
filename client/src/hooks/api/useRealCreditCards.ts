@@ -64,7 +64,7 @@ export const useUpdateRealCreditCard = () => {
     mutationFn: ({ id, userId, creditCard }: { id: string; userId: string; creditCard: UpdateCreditCard }) => 
       apiRequest(`${CREDIT_CARDS_QUERY_KEY}/${id}`, {
         method: 'PUT',
-        body: { ...creditCard, userId } as any,
+        body: creditCard as any, // Don't include userId in body - backend gets it from session
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CREDIT_CARDS_QUERY_KEY] });
