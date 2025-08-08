@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -76,48 +77,7 @@ export const Header = ({ onMenuClick, title = "Dashboard", user }: HeaderProps) 
           </Button>
 
           {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
-                >
-                  3
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <div className="px-3 py-2 border-b border-border">
-                <h4 className="font-medium text-sm">Notificações</h4>
-              </div>
-              <DropdownMenuItem className="p-3">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium">Limite do cartão atingido</span>
-                  <span className="text-xs text-muted-foreground">
-                    Você atingiu 90% do limite do seu cartão Visa
-                  </span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="p-3">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium">Fatura vencendo</span>
-                  <span className="text-xs text-muted-foreground">
-                    Fatura do cartão Mastercard vence em 3 dias
-                  </span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="p-3">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium">Meta atingida</span>
-                  <span className="text-xs text-muted-foreground">
-                    Parabéns! Você atingiu sua meta de economia
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationCenter />
 
           {/* User menu */}
           <DropdownMenu>
