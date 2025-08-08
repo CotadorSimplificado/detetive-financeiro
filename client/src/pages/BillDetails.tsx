@@ -9,7 +9,7 @@ import { useCreditCardBills } from '@/hooks/useCreditCardBills';
 import { useCreditCards } from '@/hooks/useCreditCards';
 import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/lib/currency-utils';
-import { formatDate } from '@/lib/date-utils';
+import { formatDateBR } from '@/lib/date-utils';
 import { PayBillModal } from '@/components/transactions/PayBillModal';
 import { useState } from 'react';
 
@@ -97,7 +97,7 @@ export default function BillDetails() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatDate(new Date(bill.due_date))}</div>
+            <div className="text-2xl font-bold">{formatDateBR(new Date(bill.due_date))}</div>
             <div className="flex items-center space-x-2 mt-1">
               <Badge variant={isOverdue ? "destructive" : isPaid ? "default" : "secondary"}>
                 {isPaid ? "Paga" : isOverdue ? "Vencida" : "Pendente"}
@@ -113,10 +113,10 @@ export default function BillDetails() {
           </CardHeader>
           <CardContent>
             <div className="text-sm font-medium">
-              {formatDate(new Date(bill.period_start))}
+              {formatDateBR(new Date(bill.period_start))}
             </div>
             <div className="text-xs text-muted-foreground">
-              até {formatDate(new Date(bill.period_end))}
+              até {formatDateBR(new Date(bill.period_end))}
             </div>
           </CardContent>
         </Card>
@@ -172,7 +172,7 @@ export default function BillDetails() {
                         <div className="flex-1">
                           <p className="font-medium">{transaction.description}</p>
                           <p className="text-sm text-muted-foreground">
-                            {formatDate(new Date(transaction.date))}
+                            {formatDateBR(new Date(transaction.date))}
                           </p>
                         </div>
                       </div>

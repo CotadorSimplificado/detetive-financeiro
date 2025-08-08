@@ -28,6 +28,11 @@ export function formatDateBR(date: Date, pattern: string = "dd/MM/yyyy") {
 }
 
 /**
+ * Alias for formatDateBR - for backward compatibility
+ */
+export const formatDate = formatDateBR;
+
+/**
  * Format month and year for display
  */
 export function formatMonthYear(date: Date) {
