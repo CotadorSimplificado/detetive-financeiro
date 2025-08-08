@@ -113,7 +113,7 @@ export const SENSITIVE_FIELDS = {
   CREDIT_CARD_BILL: [], // Valores financeiros ficam como decimal
   MONTHLY_PLAN: [], // Valores financeiros ficam como decimal  
   CATEGORY_BUDGET: [] // Valores financeiros ficam como decimal
-} as const;
+};
 
 /**
  * Verifica se a criptografia está configurada corretamente
@@ -147,7 +147,7 @@ export function encryptObjectFields<T extends Record<string, any>>(
   
   for (const field of fieldsToEncrypt) {
     if (encrypted[field] !== undefined && encrypted[field] !== null) {
-      encrypted[field] = encryptSensitiveData(encrypted[field]);
+      (encrypted as any)[field] = encryptSensitiveData(encrypted[field]);
     }
   }
   
@@ -166,7 +166,7 @@ export function decryptObjectFields<T extends Record<string, any>>(
   for (const field of fieldsToDecrypt) {
     if (decrypted[field] && typeof decrypted[field] === 'string') {
       try {
-        decrypted[field] = decryptSensitiveData(decrypted[field]);
+        (decrypted as any)[field] = decryptSensitiveData(decrypted[field]);
       } catch (error) {
         console.warn(`[SECURITY] Failed to decrypt field ${field}:`, error);
         // Manter valor original se descriptografia falhar

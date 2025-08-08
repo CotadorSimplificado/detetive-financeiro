@@ -15,15 +15,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
-// Tipo para request com user autenticado
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-  };
-}
+// Use the global Request type with user property
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -41,9 +33,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
   
   // GET /api/accounts - Lista contas do usuário
-  app.get("/api/accounts", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/accounts", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { type, isActive } = req.query;
       
       const filters: any = {};
@@ -59,9 +51,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/accounts/:id - Busca conta específica
-  app.get("/api/accounts/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/accounts/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       const account = await storage.getAccount(id, userId);
@@ -77,9 +69,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/accounts - Cria nova conta
-  app.post("/api/accounts", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/accounts", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const accountData = insertAccountSchema.parse({
         ...req.body,
         userId,
@@ -97,9 +89,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/accounts/:id - Atualiza conta
-  app.put("/api/accounts/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/accounts/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       const updateData = updateAccountSchema.parse(req.body);
       
@@ -115,9 +107,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DELETE /api/accounts/:id - Deleta conta
-  app.delete("/api/accounts/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/accounts/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       await storage.deleteAccount(id, userId);
@@ -133,9 +125,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
   
   // GET /api/transactions - Lista transações do usuário
-  app.get("/api/transactions", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/transactions", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { 
         type, 
         competenceMonth, 
@@ -162,9 +154,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/transactions/:id - Busca transação específica
-  app.get("/api/transactions/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/transactions/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       const transaction = await storage.getTransaction(id, userId);
@@ -180,9 +172,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions - Cria nova transação
-  app.post("/api/transactions", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/transactions", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const transactionData = insertTransactionSchema.parse({
         ...req.body,
         userId,
@@ -200,9 +192,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/transactions/:id - Atualiza transação
-  app.put("/api/transactions/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/transactions/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       const updateData = updateTransactionSchema.parse(req.body);
       
@@ -218,9 +210,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DELETE /api/transactions/:id - Deleta transação
-  app.delete("/api/transactions/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/transactions/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       await storage.deleteTransaction(id, userId);
@@ -269,9 +261,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/categories - Cria nova categoria personalizada
-  app.post("/api/categories", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/categories", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const validatedData = insertCategorySchema.parse({
         ...req.body,
         userId,
@@ -292,15 +284,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
   
   // GET /api/credit-cards - Lista cartões de crédito do usuário
-  app.get("/api/credit-cards", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/credit-cards", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { isActive } = req.query;
       
       const filters: any = {};
       if (isActive !== undefined) filters.isActive = isActive === 'true';
       
-      const cards = await storage.getCreditCards(userId, filters);
+      const cards = await storage.getCreditCards(userId);
       res.json(cards);
     } catch (error) {
       console.error("Error fetching credit cards:", error);
@@ -309,9 +301,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/credit-cards/:id - Busca cartão específico
-  app.get("/api/credit-cards/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/credit-cards/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       const card = await storage.getCreditCard(id, userId);
@@ -327,9 +319,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/credit-cards - Cria novo cartão
-  app.post("/api/credit-cards", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/credit-cards", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const cardData = insertCreditCardSchema.parse({
         ...req.body,
         userId,
@@ -347,9 +339,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/credit-cards/:id - Atualiza cartão
-  app.put("/api/credit-cards/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/credit-cards/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       const updateData = updateCreditCardSchema.parse(req.body);
       
@@ -365,9 +357,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DELETE /api/credit-cards/:id - Deleta cartão
-  app.delete("/api/credit-cards/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/credit-cards/:id", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { id } = req.params;
       
       await storage.deleteCreditCard(id, userId);
@@ -383,9 +375,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
   
   // GET /api/monthly-plans/:month/:year - Busca plano mensal específico
-  app.get("/api/monthly-plans/:month/:year", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/monthly-plans/:month/:year", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { month, year } = req.params;
       
       const plan = await storage.getMonthlyPlan(userId, Number(month), Number(year));
@@ -397,9 +389,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/monthly-plans - Cria plano mensal
-  app.post("/api/monthly-plans", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/monthly-plans", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const planData = insertMonthlyPlanSchema.parse({
         ...req.body,
         userId,
@@ -421,9 +413,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===============================
   
   // GET /api/transactions/summary - Resumo financeiro
-  app.get("/api/transactions/summary", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/transactions/summary", requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const { competenceMonth, competenceYear } = req.query;
       
       const filters: any = {};

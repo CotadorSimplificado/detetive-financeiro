@@ -25,13 +25,13 @@ export default function Cards() {
   const [editingCard, setEditingCard] = useState<any>(null);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
-  const { data: cards = [], isLoading } = useCreditCards();
+  const { data: cards = [], loading: isLoading } = useCreditCards();
   const { data: bills = [] } = useCreditCardBills();
   const createCard = useCreateCreditCard();
   const updateCard = useUpdateCreditCard();
   const deleteCard = useDeleteCreditCard();
 
-  const filteredCards = cards.filter(card => {
+  const filteredCards = cards.filter((card: any) => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || card.type === filterType;
     return matchesSearch && matchesType;
@@ -39,12 +39,12 @@ export default function Cards() {
 
   // Cálculos dos resumos
   const totalCards = cards.length;
-  const totalLimit = cards.reduce((sum, card) => sum + (card.credit_limit || 0), 0);
-  const totalAvailable = cards.reduce((sum, card) => sum + (card.available_limit || 0), 0);
+  const totalLimit = cards.reduce((sum: any, card: any) => sum + (card.credit_limit || 0), 0);
+  const totalAvailable = cards.reduce((sum: any, card: any) => sum + (card.available_limit || 0), 0);
   const totalUsed = totalLimit - totalAvailable;
   const usagePercentage = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
 
-  const cardsNearLimit = cards.filter(card => {
+  const cardsNearLimit = cards.filter((card: any) => {
     if (!card.credit_limit || !card.available_limit) return false;
     const usage = ((card.credit_limit - card.available_limit) / card.credit_limit) * 100;
     return usage > 80;
@@ -68,11 +68,11 @@ export default function Cards() {
       };
 
       if (editingCard) {
-        await updateCard.mutateAsync({ id: editingCard.id, ...transformedData });
+        await updateCard.mutateAsync({ id: editingCard.id, data: transformedData });
       } else {
         await createCard.mutateAsync({
           ...transformedData,
-          isActive: true,
+          is_active: true,
         });
       }
       setIsModalOpen(false);
@@ -95,8 +95,8 @@ export default function Cards() {
 
   const handleViewDetails = (cardId: string) => {
     // Buscar a fatura atual/mais recente do cartão
-    const cardBills = bills.filter(bill => bill.credit_card_id === cardId);
-    const currentBill = cardBills.find(bill => !bill.is_paid) || cardBills[0];
+    const cardBills = bills.filter((bill: any) => bill.credit_card_id === cardId);
+    const currentBill = cardBills.find((bill: any) => !bill.is_paid) || cardBills[0];
     
     if (currentBill) {
       navigate(`/bills/${currentBill.id}`);
@@ -108,13 +108,13 @@ export default function Cards() {
 
   const handleSetDefault = async (id: string) => {
     // Primeiro, remove o default de todos os cartões
-    const currentDefault = cards.find(card => card.is_default);
+    const currentDefault = cards.find((card: any) => card.is_default);
     if (currentDefault && currentDefault.id !== id) {
-      await updateCard.mutateAsync({ id: currentDefault.id, is_default: false });
+      await updateCard.mutateAsync({ id: currentDefault.id, data: { is_default: false } });
     }
     
     // Depois define o novo como default
-    await updateCard.mutateAsync({ id, is_default: true });
+    await updateCard.mutateAsync({ id, data: { is_default: true } });
   };
 
   return (
@@ -263,7 +263,7 @@ export default function Cards() {
               )}
             </div>
           ) : (
-            filteredCards.map((card) => (
+            filteredCards.map((card: any) => (
               <CreditCardCard
                 key={card.id}
                 card={card}
