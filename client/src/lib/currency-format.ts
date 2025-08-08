@@ -8,7 +8,15 @@
 export function formatCurrencyInput(value: number | string): string {
   if (!value && value !== 0) return '';
   
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  let numValue: number;
+  
+  if (typeof value === 'string') {
+    // Handle decimal strings from database (e.g., "5000.00")
+    numValue = parseFloat(value);
+  } else {
+    numValue = value;
+  }
+  
   if (isNaN(numValue)) return '';
   
   return numValue.toLocaleString('pt-BR', {

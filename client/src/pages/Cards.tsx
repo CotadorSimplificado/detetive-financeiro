@@ -68,12 +68,9 @@ export default function Cards() {
       };
 
       if (editingCard) {
-        await updateCard.mutateAsync({ id: editingCard.id, data: transformedData });
+        await updateCard.mutateAsync({ id: editingCard.id, ...transformedData });
       } else {
-        await createCard.mutateAsync({
-          ...transformedData,
-          is_active: true,
-        });
+        await createCard.mutateAsync(transformedData);
       }
       setIsModalOpen(false);
       setEditingCard(null);

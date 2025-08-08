@@ -12,6 +12,7 @@ import { CreditCard } from "@/hooks/useCreditCards";
 import { formatCurrencyInput } from "@/lib/currency-format";
 import { useCurrencyInput } from "@/hooks/useCurrencyInput";
 import { parseCurrency } from "@/lib/currency-utils";
+import { featureFlags } from "@/lib/featureFlags";
 
 interface CreditCardFormProps {
   onSubmit: (data: CreditCardFormData) => void;
@@ -42,42 +43,75 @@ export function CreditCardForm({
   const form = useForm<CreditCardFormData>({
     resolver: zodResolver(creditCardSchema),
     defaultValues: {
-      name: defaultValues?.name || "",
-      type: defaultValues?.type || "CREDIT",
-      brand: defaultValues?.brand || "OTHER",
-      last_digits: defaultValues?.last_digits || "",
-      color: defaultValues?.color || "#2563eb",
-      credit_limit: defaultValues?.credit_limit ? formatCurrencyInput(defaultValues.credit_limit) : "0,00",
-      available_limit: defaultValues?.available_limit ? formatCurrencyInput(defaultValues.available_limit) : "0,00",
-      closing_day: defaultValues?.closing_day?.toString() || "1",
-      due_day: defaultValues?.due_day?.toString() || "1",
-      is_default: defaultValues?.is_default || false,
-      is_virtual: defaultValues?.is_virtual || false,
-      parent_card_id: defaultValues?.parent_card_id || null,
+      name: "",
+      type: "CREDIT",
+      brand: "OTHER",
+      last_digits: "",
+      color: "#2563eb",
+      credit_limit: "0,00",
+      available_limit: "0,00",
+      closing_day: "1",
+      due_day: "1",
+      is_default: false,
+      is_virtual: false,
+      parent_card_id: null,
     },
   });
 
   // Quando editar um cartão, reidrata os valores do formulário
   React.useEffect(() => {
-    const values: CreditCardFormData = {
-      name: defaultValues?.name || "",
-      type: (defaultValues as any)?.type || "CREDIT",
-      brand: (defaultValues as any)?.brand || "OTHER",
-      last_digits: (defaultValues as any)?.last_digits || "",
-      color: (defaultValues as any)?.color || "#2563eb",
-      credit_limit: (defaultValues as any)?.credit_limit
-        ? formatCurrencyInput((defaultValues as any).credit_limit as any)
-        : "0,00",
-      available_limit: (defaultValues as any)?.available_limit
-        ? formatCurrencyInput((defaultValues as any).available_limit as any)
-        : "0,00",
-      closing_day: (defaultValues as any)?.closing_day?.toString() || "1",
-      due_day: (defaultValues as any)?.due_day?.toString() || "1",
-      is_default: (defaultValues as any)?.is_default || false,
-      is_virtual: (defaultValues as any)?.is_virtual || false,
-      parent_card_id: (defaultValues as any)?.parent_card_id || null,
-    };
-    form.reset(values);
+    if (defaultValues) {
+      const values: CreditCardFormData = {
+        name: defaultValues?.name || "",
+        type: (defaultValues as any)?.type || "CREDIT",
+        brand: (defaultValues as any)?.brand || "OTHER",
+        // Mapear lastFourDigits do backend para last_digits do frontend
+        last_digits: (defaultValues as any)?.lastFourDigits || (defaultValues as any)?.last_digits || "",
+        color: (defaultValues as any)?.color || "#2563eb",
+        // Mapear limit do backend para credit_limit do frontend
+        credit_limit: (() => {
+          const backendLimit = (defaultValues as any)?.limit || (defaultValues as any)?.credit_limit;
+          if (backendLimit) {
+            const formatted = formatCurrencyInput(backendLimit);
+            if (featureFlags.isEnabled('debugMode')) {
+              console.log('🎯 Formatando limit:', { original: backendLimit, formatted });
+            }
+            return formatted;
+          }
+          return "0,00";
+        })(),
+        // Mapear availableLimit do backend para available_limit do frontend
+        available_limit: (() => {
+          const backendAvailable = (defaultValues as any)?.availableLimit || (defaultValues as any)?.available_limit;
+          if (backendAvailable) {
+            const formatted = formatCurrencyInput(backendAvailable);
+            if (featureFlags.isEnabled('debugMode')) {
+              console.log('🎯 Formatando availableLimit:', { original: backendAvailable, formatted });
+            }
+            return formatted;
+          }
+          return "0,00";
+        })(),
+        // Mapear closingDay do backend para closing_day do frontend
+        closing_day: (defaultValues as any)?.closingDay?.toString() || 
+                     (defaultValues as any)?.closing_day?.toString() || "1",
+        // Mapear dueDay do backend para due_day do frontend
+        due_day: (defaultValues as any)?.dueDay?.toString() || 
+                 (defaultValues as any)?.due_day?.toString() || "1",
+        // Mapear isDefault do backend para is_default do frontend
+        is_default: (defaultValues as any)?.isDefault ?? (defaultValues as any)?.is_default ?? false,
+        is_virtual: (defaultValues as any)?.is_virtual || false,
+        parent_card_id: (defaultValues as any)?.parent_card_id || null,
+      };
+      form.reset(values);
+      
+      if (featureFlags.isEnabled('debugMode')) {
+        console.log('🎯 CreditCardForm: Mapeando dados para edição', {
+          backend: defaultValues,
+          frontend: values
+        });
+      }
+    }
   }, [defaultValues]);
 
   const watchType = form.watch("type");
@@ -146,7 +180,7 @@ export function CreditCardForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo" />
@@ -171,7 +205,7 @@ export function CreditCardForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Bandeira</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a bandeira" />
@@ -372,7 +406,7 @@ export function CreditCardForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cartão Principal</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o cartão principal" />
