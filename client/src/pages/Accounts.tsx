@@ -19,11 +19,11 @@ export default function Accounts() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
 
-  const { data: accounts = [], loading, error } = useAccounts();
+  const { accounts = [], loading, error } = useAccounts();
 
   // Memoiza os cálculos pesados
   const { filteredAccounts, totalBalance } = useMemo(() => {
-    const filtered = accounts.filter((account) => {
+    const filtered = accounts.filter((account: Account) => {
       const matchesSearch = account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            account.bank_name?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = typeFilter === "all" || account.type === typeFilter;
@@ -32,8 +32,8 @@ export default function Accounts() {
     });
 
     const total = accounts
-      .filter(account => account.include_in_total)
-      .reduce((sum, account) => sum + account.current_balance, 0);
+      .filter((account: Account) => account.include_in_total)
+      .reduce((sum: number, account: Account) => sum + account.current_balance, 0);
 
     return { filteredAccounts: filtered, totalBalance: total };
   }, [accounts, searchTerm, typeFilter]);
@@ -137,7 +137,7 @@ export default function Accounts() {
             </div>
           ) : filteredAccounts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAccounts.map((account) => (
+              {filteredAccounts.map((account: Account) => (
                 <AccountCard
                   key={account.id}
                   account={account}

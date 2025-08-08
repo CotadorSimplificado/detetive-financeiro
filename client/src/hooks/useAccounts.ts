@@ -1,6 +1,6 @@
 // Hook de contas com migração gradual: Mock -> Real API
 import { useMockAccounts } from '@/data/hooks/useMockAccounts';
-import { useRealAccountsAPI } from '@/hooks/api/useRealAccounts';
+import { useRealAccounts, useCreateRealAccount, useUpdateRealAccount, useDeleteRealAccount } from '@/hooks/api/useRealAccounts';
 import { featureFlags } from '@/lib/featureFlags';
 
 export const useAccounts = (userId: string = 'mock-user') => {
@@ -8,22 +8,22 @@ export const useAccounts = (userId: string = 'mock-user') => {
   
   // Selecionar implementação baseada na feature flag
   const mockResult = useMockAccounts();
-  const realResult = useRealAccountsAPI(userId);
+  const realQuery = useRealAccounts(userId);
   
   // Retornar resultado baseado na configuração
   if (useRealAPI) {
     if (featureFlags.isEnabled('debugMode')) {
       console.log('🔄 useAccounts: usando API real', { 
-        accounts: realResult.accounts.length,
-        loading: realResult.loading 
+        accounts: realQuery.data?.length || 0,
+        loading: realQuery.isLoading 
       });
     }
     
     return {
-      data: realResult.accounts,
-      loading: realResult.loading,
-      error: realResult.error,
-      ...realResult
+      accounts: realQuery.data || [],
+      loading: realQuery.isLoading,
+      error: realQuery.error,
+      refetch: realQuery.refetch
     };
   } else {
     if (featureFlags.isEnabled('debugMode')) {
@@ -34,7 +34,7 @@ export const useAccounts = (userId: string = 'mock-user') => {
     }
     
     return {
-      data: mockResult.accounts,
+      accounts: mockResult.accounts,
       loading: mockResult.loading,
       error: mockResult.error,
       ...mockResult
@@ -43,19 +43,56 @@ export const useAccounts = (userId: string = 'mock-user') => {
 };
 
 // Hooks individuais para compatibilidade
-export const useCreateAccount = () => {
-  const { createAccount } = useMockAccounts();
-  return createAccount;
+export const useCreateAccount = (userId: string = 'mock-user') => {
+  const useRealAPI = featureFlags.isEnabled('useRealAccounts');
+  const { createAccount: mockCreate } = useMockAccounts();
+  const realCreate = useCreateRealAccount();
+  
+  if (useRealAPI) {
+    return realCreate;
+  } else {
+    // Wrap mock function to match mutation interface
+    return {
+      mutateAsync: mockCreate,
+      isPending: false
+    };
+  }
 };
 
-export const useUpdateAccount = () => {
-  const { updateAccount } = useMockAccounts();
-  return updateAccount;
+export const useUpdateAccount = (userId: string = 'mock-user') => {
+  const useRealAPI = featureFlags.isEnabled('useRealAccounts');
+  const { updateAccount: mockUpdate } = useMockAccounts();
+  const realUpdate = useUpdateRealAccount();
+  
+  if (useRealAPI) {
+    return realUpdate;
+  } else {
+    return {
+      mutateAsync: (data: any) => mockUpdate(data.id, data),
+      isPending: false
+    };
+  }
 };
 
-export const useDeleteAccount = () => {
-  const { deleteAccount } = useMockAccounts();
-  return deleteAccount;
+export const useDeleteAccount = (userId: string = 'mock-user') => {
+  const useRealAPI = featureFlags.isEnabled('useRealAccounts');
+  const { deleteAccount: mockDelete } = useMockAccounts();
+  const realDelete = useDeleteRealAccount();
+  
+  if (useRealAPI) {
+    return realDelete;
+  } else {
+    return {
+      mutateAsync: (data: any) => {
+        if (typeof data === 'string') {
+          return mockDelete(data);
+        } else {
+          return mockDelete(data.id);
+        }
+      },
+      isPending: false
+    };
+  }
 };
 
 export type { Account } from '@/data/types';

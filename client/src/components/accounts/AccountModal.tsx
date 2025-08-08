@@ -22,9 +22,15 @@ export function AccountModal({ open, onOpenChange, account, mode }: AccountModal
   const handleSubmit = async (data: AccountFormData) => {
     try {
       if (mode === 'create') {
-        await createAccount.mutateAsync(data);
+        const accountData = {
+          ...data,
+          user_id: 'mock-user',
+          current_balance: data.initial_balance,
+          sync_enabled: true
+        };
+        await createAccount.mutateAsync(accountData);
       } else if (account) {
-        await updateAccount.mutateAsync({ id: account.id, ...data });
+        await updateAccount.mutateAsync({ id: account.id, userId: 'mock-user', account: data });
       }
       onOpenChange(false);
     } catch (error) {
