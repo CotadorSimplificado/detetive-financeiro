@@ -889,6 +889,23 @@ Para todos os campos e endpoints que manipulam valores de dinheiro:
 
 Essas regras garantem UX consistente no cliente e dados padronizados no servidor.
 
+## Padrão de inputs numéricos de 2 dígitos (ex.: dia)
+
+- **Frontend**: usar `type="text"`, `inputMode="numeric"`, `pattern="[0-9]*"`, `maxLength={2}` e sanitização no `onChange` para aceitar apenas 2 dígitos (ex.: `"15"`).
+- **Payloads**: enviar como string de 1–2 dígitos ("1" a "31") ou número inteiro (1–31), mantendo consistência em toda a API.
+- **Validação (backend)**: validar com Zod que o valor é inteiro entre 1 e 31; normalizar para inteiro antes de persistir.
+
+Exemplo de validação Zod (backend):
+
+```ts
+import { z } from 'zod'
+
+export const daySchema = z.union([
+  z.string().regex(/^\d{1,2}$/).transform(v => Number(v)),
+  z.number().int()
+]).refine(n => Number.isInteger(n) && n >= 1 && n <= 31, 'Dia inválido (1 a 31)')
+```
+
 ## Conclusão
 
 Este plano fornece um caminho claro e testado para migrar o Detetive Financeiro de um protótipo com dados mock para uma aplicação de produção completa. A abordagem incremental minimiza riscos e permite validação contínua.

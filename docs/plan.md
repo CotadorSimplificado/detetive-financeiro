@@ -363,6 +363,52 @@ Notas:
 - `numericValue` é sempre o valor em número (ex.: 1234.56) para salvar no banco/API.
 - Para valores máximos, use `maxValue` em `useCurrencyInput`.
 
+### Padrão de inputs numéricos de 2 dígitos (ex.: dia)
+
+Para campos que devem aceitar apenas números com no máximo 2 dígitos (ex.: dia de fechamento/vencimento):
+
+- Use `type="text"` com `inputMode="numeric"` e `pattern="[0-9]*"` para abrir o teclado numérico no mobile.
+- Aplique `maxLength={2}` e sanitize no `onChange` permitindo apenas dígitos: `value.replace(/\D/g, '').slice(0, 2)`.
+- Valide no formulário com Zod para garantir faixa válida (ex.: 1..31).
+
+Exemplo com React Hook Form (`Controller`):
+
+```tsx
+import { Controller, useForm } from 'react-hook-form'
+import { Input } from '@/components/ui/input'
+import { z } from 'zod'
+
+const schema = z.object({
+  closing_day: z.string().min(1).max(2).refine(v => {
+    const n = Number(v)
+    return Number.isInteger(n) && n >= 1 && n <= 31
+  }, 'Dia inválido (1 a 31)')
+})
+
+export function DayField({ control }: { control: any }) {
+  return (
+    <Controller
+      name="closing_day"
+      control={control}
+      render={({ field }) => (
+        <Input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={2}
+          placeholder="15"
+          value={field.value || ''}
+          onChange={(e) => {
+            const onlyDigits = e.target.value.replace(/\D/g, '').slice(0, 2)
+            field.onChange(onlyDigits)
+          }}
+        />
+      )}
+    />
+  )
+}
+```
+
 ## Cronograma de Migração para Produção com Replit Auth
 
 ### Fase 1: Autenticação Replit (3-5 dias) 🔴 PRIORIDADE
