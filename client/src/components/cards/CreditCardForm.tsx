@@ -1,3 +1,4 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { creditCardSchema, CreditCardFormData } from "@/lib/validations/credit-card";
 import { CreditCard } from "@/hooks/useCreditCards";
 import { formatCurrencyInput } from "@/lib/currency-format";
+import { useCurrencyInput } from "@/hooks/useCurrencyInput";
+import { parseCurrency } from "@/lib/currency-utils";
 
 interface CreditCardFormProps {
   onSubmit: (data: CreditCardFormData) => void;
@@ -57,6 +60,44 @@ export function CreditCardForm({
   const watchType = form.watch("type");
   const watchIsVirtual = form.watch("is_virtual");
   const isCreditCard = watchType === "CREDIT" || watchType === "CREDIT_DEBIT";
+
+  function CurrencyInputField({ field, placeholder = "0,00" }: { field: any; placeholder?: string }) {
+    const initialNumeric = React.useMemo(() => {
+      return parseCurrency(String(field.value ?? ""));
+    }, [field.value]);
+
+    const { displayValue, handleChange, handleBlur, handleFocus, setDisplayValue } = useCurrencyInput({
+      initialValue: isNaN(initialNumeric) ? 0 : initialNumeric,
+    });
+
+    // Mantém o display sincronizado quando o form injeta valores (ex.: edição)
+    React.useEffect(() => {
+      const current = String(field.value ?? "");
+      if (current !== displayValue) {
+        setDisplayValue(current);
+      }
+    }, [field.value]);
+
+    // Propaga a string mascarada para o RHF
+    React.useEffect(() => {
+      if (displayValue !== field.value) {
+        field.onChange(displayValue);
+      }
+    }, [displayValue]);
+
+    return (
+      <Input
+        type="text"
+        inputMode="decimal"
+        lang="pt-BR"
+        placeholder={placeholder}
+        value={displayValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+      />
+    );
+  }
 
   return (
     <Form {...form}>
@@ -188,16 +229,7 @@ export function CreditCardForm({
                     <FormItem>
                       <FormLabel>Limite de Crédito</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="0,00"
-                          {...field}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            // Allow only numbers, dots, commas and spaces for Brazilian format
-                            const cleanValue = value.replace(/[^\d.,\s]/g, '');
-                            field.onChange(cleanValue);
-                          }}
-                        />
+                        <CurrencyInputField field={field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -211,16 +243,7 @@ export function CreditCardForm({
                     <FormItem>
                       <FormLabel>Limite Disponível</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="0,00"
-                          {...field}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            // Allow only numbers, dots, commas and spaces for Brazilian format
-                            const cleanValue = value.replace(/[^\d.,\s]/g, '');
-                            field.onChange(cleanValue);
-                          }}
-                        />
+                        <CurrencyInputField field={field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
