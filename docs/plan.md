@@ -304,6 +304,65 @@ npm run db:push
 - Validação de formulários com React Hook Form
 - Tipos TypeScript rigorosos
 
+### Padrão de inputs monetários (obrigatório)
+
+Para todo campo que represente valores em dinheiro (floats), a entrada deve ser autoformatada enquanto o usuário digita, no formato brasileiro (pt-BR) com 2 casas decimais.
+
+- Use o hook `useCurrencyInput` para controlar o valor exibido e o valor numérico.
+- Use `type="text"` com `inputMode="decimal"` para respeitar o teclado numérico e a localidade.
+- Exiba `displayValue` no `Input` e consuma `numericValue` na submissão/envio ao backend.
+- Evite `type="number"` para não quebrar a formatação local (vírgula vs. ponto).
+
+Exemplo com React Hook Form (`Controller`):
+
+```tsx
+import { Controller, useForm } from 'react-hook-form'
+import { Input } from '@/components/ui/input'
+import { useCurrencyInput } from '@/hooks/useCurrencyInput'
+
+type FormData = { amount: number }
+
+export function AmountField() {
+  const { control } = useForm<FormData>({ defaultValues: { amount: 0 } })
+
+  return (
+    <Controller
+      name="amount"
+      control={control}
+      render={({ field }) => {
+        const {
+          displayValue,
+          handleChange,
+          handleBlur,
+          handleFocus,
+        } = useCurrencyInput({
+          initialValue: Number(field.value) || 0,
+          onChange: (value) => field.onChange(value), // value numérico
+        })
+
+        return (
+          <Input
+            type="text"
+            inputMode="decimal"
+            lang="pt-BR"
+            placeholder="0,00"
+            value={displayValue}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+          />
+        )
+      }}
+    />
+  )
+}
+```
+
+Notas:
+- `useCurrencyInput` mantém o cursor estável e aplica a máscara em tempo real.
+- `numericValue` é sempre o valor em número (ex.: 1234.56) para salvar no banco/API.
+- Para valores máximos, use `maxValue` em `useCurrencyInput`.
+
 ## Cronograma de Migração para Produção com Replit Auth
 
 ### Fase 1: Autenticação Replit (3-5 dias) 🔴 PRIORIDADE
