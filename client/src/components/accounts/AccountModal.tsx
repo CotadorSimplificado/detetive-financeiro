@@ -52,17 +52,17 @@ export function AccountModal({ open, onOpenChange, account, mode }: AccountModal
 
   const defaultValues = account ? {
     name: account.name,
-    type: account.type,
+    type: account.type as "CHECKING" | "SAVINGS" | "INVESTMENT" | "CASH",
     bank_name: account.bank_name || undefined,
     bank_code: account.bank_code || undefined,
     agency_number: account.agency_number || undefined,
     account_number: account.account_number || undefined,
-    initial_balance: account.initial_balance,
-    color: account.color,
+    initial_balance: account.current_balance || 0,
+    color: account.color || "#2196F3",
     icon: account.icon || undefined,
-    is_default: account.is_default,
-    include_in_total: account.include_in_total,
-    is_active: account.is_active,
+    is_default: account.is_default || false,
+    include_in_total: account.include_in_total !== false, // default true
+    is_active: account.is_active !== false, // default true
   } : undefined;
 
   return (

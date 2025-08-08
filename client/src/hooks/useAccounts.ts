@@ -33,12 +33,7 @@ export const useAccounts = (userId: string = 'mock-user') => {
       });
     }
     
-    return {
-      accounts: mockResult.accounts,
-      loading: mockResult.loading,
-      error: mockResult.error,
-      ...mockResult
-    };
+    return mockResult;
   }
 };
 
@@ -80,16 +75,13 @@ export const useDeleteAccount = (userId: string = 'mock-user') => {
   const realDelete = useDeleteRealAccount();
   
   if (useRealAPI) {
-    return realDelete;
+    return {
+      mutateAsync: (id: string) => realDelete.mutateAsync({ id, userId }),
+      isPending: realDelete.isPending
+    };
   } else {
     return {
-      mutateAsync: (data: any) => {
-        if (typeof data === 'string') {
-          return mockDelete(data);
-        } else {
-          return mockDelete(data.id);
-        }
-      },
+      mutateAsync: mockDelete,
       isPending: false
     };
   }
