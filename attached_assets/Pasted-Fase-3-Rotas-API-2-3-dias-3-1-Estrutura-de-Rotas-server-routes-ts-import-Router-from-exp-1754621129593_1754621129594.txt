@@ -1,0 +1,148 @@
+Fase 3: Rotas API (2-3 dias)
+3.1 Estrutura de Rotas (server/routes.ts)
+import { Router } from 'express';
+import { storage } from './storage';
+import { isAuthenticated } from './middleware/auth';
+import { z } from 'zod';
+const router = Router();
+// Middleware de autenticação para todas as rotas
+router.use(isAuthenticated);
+// === ACCOUNTS ===
+router.get('/api/accounts', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const accounts = await storage.getAccounts(userId);
+    res.json(accounts);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+});
+router.post('/api/accounts', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const account = insertAccountSchema.parse({
+      ...req.body,
+      userId,
+    });
+    const newAccount = await storage.createAccount(account);
+    res.json(newAccount);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to create account' });
+    }
+  }
+});
+router.put('/api/accounts/:id', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const account = await storage.updateAccount(id, userId, req.body);
+    res.json(account);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update account' });
+  }
+});
+router.delete('/api/accounts/:id', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    await storage.deleteAccount(id, userId);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+// === TRANSACTIONS ===
+router.get('/api/transactions', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const filters = {
+      competenceMonth: req.query.competence_month ? Number(req.query.competence_month) : undefined,
+      competenceYear: req.query.competence_year ? Number(req.query.competence_year) : undefined,
+      type: req.query.type as string | undefined,
+    };
+    const transactions = await storage.getTransactions(userId, filters);
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+router.post('/api/transactions', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const transaction = insertTransactionSchema.parse({
+      ...req.body,
+      userId,
+    });
+    const newTransaction = await storage.createTransaction(transaction);
+    res.json(newTransaction);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to create transaction' });
+    }
+  }
+});
+// === CATEGORIES ===
+router.get('/api/categories', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const categories = await storage.getCategories(userId);
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+// === CREDIT CARDS ===
+router.get('/api/credit-cards', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const cards = await storage.getCreditCards(userId);
+    res.json(cards);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch credit cards' });
+  }
+});
+// === MONTHLY PLANS ===
+router.get('/api/monthly-plans/:month/:year', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { month, year } = req.params;
+    const plan = await storage.getMonthlyPlan(userId, Number(month), Number(year));
+    res.json(plan || null);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch monthly plan' });
+  }
+});
+// === SUMMARY ===
+router.get('/api/transactions/summary', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const filters = {
+      competenceMonth: req.query.competence_month ? Number(req.query.competence_month) : undefined,
+      competenceYear: req.query.competence_year ? Number(req.query.competence_year) : undefined,
+    };
+    
+    const transactions = await storage.getTransactions(userId, filters);
+    
+    const summary = {
+      income: transactions
+        .filter(t => t.type === 'INCOME')
+        .reduce((sum, t) => sum + Number(t.amount), 0),
+      expenses: transactions
+        .filter(t => t.type === 'EXPENSE' || t.type === 'CREDIT_CARD_EXPENSE')
+        .reduce((sum, t) => sum + Number(t.amount), 0),
+      balance: 0,
+    };
+    
+    summary.balance = summary.income - summary.expenses;
+    
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate summary' });
+  }
+});
+export default router;
