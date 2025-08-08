@@ -10,11 +10,7 @@ export const useTransactions = (filters?: any) => {
     if (filters.type && filters.type !== 'all') {
       filteredTransactions = filteredTransactions.filter(t => t.type === filters.type);
     }
-    if (filters.search) {
-      filteredTransactions = filteredTransactions.filter(t => 
-        t.description.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
+    // Remove search filter for now as it's not in the interface
     // Filtros de competência podem ser implementados aqui se necessário
   }
   
@@ -56,14 +52,7 @@ export const useTransactionsSummary = (filters?: any) => {
   let filteredExpenses = expenseTransactions;
   let filteredTransfers = transferTransactions;
   
-  if (filters) {
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filteredIncome = filteredIncome.filter(t => t.description.toLowerCase().includes(searchLower));
-      filteredExpenses = filteredExpenses.filter(t => t.description.toLowerCase().includes(searchLower));
-      filteredTransfers = filteredTransfers.filter(t => t.description.toLowerCase().includes(searchLower));
-    }
-  }
+  // Remove search filtering for now
   
   const income = filteredIncome.reduce((sum, t) => sum + (t.amount || 0), 0);
   const expenses = filteredExpenses.reduce((sum, t) => sum + (t.amount || 0), 0);

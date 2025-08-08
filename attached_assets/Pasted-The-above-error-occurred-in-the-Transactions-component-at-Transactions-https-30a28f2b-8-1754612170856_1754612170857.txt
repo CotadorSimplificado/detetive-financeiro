@@ -1,0 +1,19 @@
+The above error occurred in the <Transactions> component:
+
+    at Transactions (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/src/pages/Transactions.tsx:36:39)
+    at ProtectedRoute (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/src/components/auth/ProtectedRoute.tsx:23:34)
+    at RenderedRoute (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=97ff2e0f:5643:26)
+    at Routes (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=97ff2e0f:6379:3)
+    at Router (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=97ff2e0f:6322:13)
+    at BrowserRouter (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=97ff2e0f:9403:3)
+    at Provider (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=43297bc9:38:15)
+    at TooltipProvider (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a1c78d3b:64:5)
+    at MockProvider (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/src/data/store/mockContext.tsx:172:32)
+    at V (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/next-themes.js?v=10d0031e:44:25)
+    at J (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/next-themes.js?v=10d0031e:42:18)
+    at QueryClientProvider (https://30a28f2b-848b-437c-b48f-5a78857b96b3-00-2zhxc6485xr9x.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=4c7cb9d7:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Cannot read properties of undefined (reading 'icon')

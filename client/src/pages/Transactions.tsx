@@ -30,12 +30,11 @@ export default function Transactions() {
   );
 
   // Criar filtros para as queries
-  const filters = useMemo((): TransactionFilters => ({
+  const filters = useMemo(() => ({
     type: typeFilter === "all" ? undefined : typeFilter as any,
-    search: searchTerm || undefined,
     competence_month: competenceDate.getMonth() + 1, // getMonth() returns 0-11
     competence_year: competenceDate.getFullYear(),
-  }), [searchTerm, typeFilter, competenceDate]);
+  }), [typeFilter, competenceDate]);
 
   // Hooks para buscar dados
   const { data: transactions = [], isLoading: isLoadingTransactions, error: transactionsError } = useTransactions(filters);
@@ -210,7 +209,7 @@ export default function Transactions() {
           ) : (
             <div className="divide-y">
               {/* Credit card bills */}
-              {creditCardBills.filter(bill => !bill.is_paid).map((bill) => (
+              {creditCardBills.filter((bill: any) => !bill.is_paid).map((bill: any) => (
                 <div key={bill.id} className="p-4 hover:bg-muted/50 transition-colors">
                   <CreditCardBillItem bill={bill} />
                 </div>
@@ -229,7 +228,7 @@ export default function Transactions() {
                               transaction.type === "EXPENSE" ? "bg-destructive/10" : "bg-primary/10"
                             } flex items-center justify-center`}>
                               <span className={`text-sm font-semibold ${getTransactionTypeColor(transaction.type)}`}>
-                                {transaction.category.icon || getTransactionTypeIcon(transaction.type, transaction.amount)}
+                                {getTransactionTypeIcon(transaction.type, transaction.amount)}
                               </span>
                             </div>
                           </div>
@@ -238,7 +237,7 @@ export default function Transactions() {
                               {transaction.description}
                             </p>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>{transaction.category.name}</span>
+                              <span>Categoria</span>
                               <span>•</span>
                               <span>{getAccountDisplay(transaction)}</span>
                               <span>•</span>
@@ -260,7 +259,7 @@ export default function Transactions() {
                     </div>
                   </div>
                 ))
-              ) : creditCardBills.filter(bill => !bill.is_paid).length === 0 ? (
+              ) : creditCardBills.filter((bill: any) => !bill.is_paid).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <Plus className="h-8 w-8 text-muted-foreground" />
