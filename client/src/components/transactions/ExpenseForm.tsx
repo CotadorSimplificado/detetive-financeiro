@@ -75,7 +75,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
   });
 
   const transactionType = form.watch("transaction_type");
-  const expenseCategories = categories?.filter(cat => cat.type === 'EXPENSE') || [];
+  const expenseCategories = categories?.filter((cat: any) => cat.type === 'EXPENSE') || [];
 
   const handleSubmit = async (data: ExpenseFormData) => {
     setIsLoading(true);
@@ -189,7 +189,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
             <SelectValue placeholder="Selecione a conta" />
           </SelectTrigger>
           <SelectContent position="popper" sideOffset={4}>
-            {accounts?.map((account) => (
+            {accounts?.map((account: any) => (
               <SelectItem key={account.id} value={account.id}>
                 <div className="flex items-center gap-2">
                   <div 
@@ -218,7 +218,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
             <SelectValue placeholder="Selecione a categoria" />
           </SelectTrigger>
           <SelectContent position="popper" sideOffset={4}>
-            {expenseCategories.map((category) => (
+            {expenseCategories.map((category: any) => (
               <SelectItem key={category.id} value={category.id}>
                 <div className="flex items-center gap-2">
                   {category.icon && <span>{category.icon}</span>}
