@@ -116,6 +116,11 @@ export class MockStore {
   constructor() {
     // Tentar recuperar sessão do localStorage na inicialização
     this.loadSessionFromStorage();
+    
+    // Se não há sessão válida, fazer login automático com usuário exemplo
+    if (!this.currentSession) {
+      this.autoLoginWithDefaultUser();
+    }
   }
 
   // ===== PERSISTÊNCIA DE SESSÃO =====
@@ -159,6 +164,29 @@ export class MockStore {
       localStorage.removeItem(this.SESSION_KEY);
     } catch (error) {
       console.warn('Erro ao limpar sessão do localStorage:', error);
+    }
+  }
+
+  // Login automático com usuário padrão para desenvolvimento
+  private autoLoginWithDefaultUser(): void {
+    try {
+      const defaultUser = findUserByEmail('usuario@exemplo.com');
+      if (defaultUser) {
+        this.currentUser = defaultUser;
+        this.currentSession = {
+          user: defaultUser,
+          access_token: 'mock-auto-login-token-' + Math.random().toString(36).substr(2, 9),
+          refresh_token: 'mock-auto-refresh-token-' + Math.random().toString(36).substr(2, 9),
+          expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
+        };
+        
+        // Salvar sessão no localStorage
+        this.saveSessionToStorage();
+        
+        console.log('Login automático realizado com usuário:', defaultUser.full_name);
+      }
+    } catch (error) {
+      console.warn('Erro durante login automático:', error);
     }
   }
 
