@@ -1,7 +1,7 @@
 // Exportações principais do sistema de dados mock
 
 // Tipos
-export * from './types';
+export * from './types/index';
 
 // Store principal
 export { default as mockStore, MockStore } from './store/mockStore';

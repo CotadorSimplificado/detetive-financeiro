@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DatePicker } from '@/components/ui/calendar';
 import { DonutChart } from '@/components/charts/DonutChart';
-import { LineChart } from '@/components/charts/LineChart';
+import { CustomLineChart } from '@/components/charts/LineChart';
 import { CustomBarChart } from '@/components/charts/BarChart';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -16,7 +16,7 @@ import { useCreditCards } from '@/hooks/useCreditCards';
 import { useCategories } from '@/hooks/useCategories';
 import { formatCurrency } from '@/lib/currency-utils';
 import { formatDate } from '@/lib/date-utils';
-import { TransactionType } from '@/data/types';
+
 import { 
   FileText, 
   Download, 
@@ -410,13 +410,10 @@ export default function Reports() {
               <CardTitle>Tendência Mensal</CardTitle>
             </CardHeader>
             <CardContent>
-              <LineChart 
+              <CustomLineChart 
                 data={monthlyTrend}
-                lines={[
-                  { key: 'income', label: 'Receitas', color: '#10b981' },
-                  { key: 'expenses', label: 'Despesas', color: '#ef4444' }
-                ]}
-                xAxisKey="month"
+                height={300}
+                color="#10b981"
               />
             </CardContent>
           </Card>
@@ -428,13 +425,13 @@ export default function Reports() {
               <CardTitle>Receitas vs Despesas</CardTitle>
             </CardHeader>
             <CardContent>
-              <BarChart 
+              <CustomBarChart 
                 data={monthlyTrend}
+                height={300}
                 bars={[
-                  { key: 'income', label: 'Receitas', color: '#10b981' },
-                  { key: 'expenses', label: 'Despesas', color: '#ef4444' }
+                  { key: 'income', color: '#10b981', name: 'Receitas' },
+                  { key: 'expenses', color: '#ef4444', name: 'Despesas' }
                 ]}
-                xAxisKey="month"
               />
             </CardContent>
           </Card>
