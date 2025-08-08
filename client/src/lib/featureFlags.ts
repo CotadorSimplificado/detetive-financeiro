@@ -10,11 +10,11 @@ interface FeatureFlags {
   useRealTransactions: boolean;
   useRealCreditCards: boolean;
   useRealAuth: boolean;
-  
+
   // Funcionalidades específicas
   useRealBudgets: boolean;
   useRealReports: boolean;
-  
+
   // Debug e desenvolvimento
   debugMode: boolean;
   parallelMode: boolean; // Executar mock e real em paralelo para comparação
@@ -27,12 +27,12 @@ const defaultFlags: FeatureFlags = {
   useRealAccounts: true,
   useRealTransactions: true,
   useRealCreditCards: true,
-  
+
   // Fase 4: Auth e features avançadas
   useRealAuth: true,
   useRealBudgets: false,
   useRealReports: false,
-  
+
   // Debug ativo para validação
   debugMode: true,
   parallelMode: false,
