@@ -8,6 +8,8 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutos
       retry: (failureCount, error: any) => {
         // Não repetir se for erro 4xx (cliente)
+        if (error?.status >= 400 && error?.status < 500) return false;
+        if (error?.message?.includes('401')) return false;
         if (error?.message?.includes('4')) return false;
         return failureCount < 3;
       },

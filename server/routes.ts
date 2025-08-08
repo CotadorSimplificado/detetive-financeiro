@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isReplitEnv } from "./replitAuth";
@@ -16,7 +16,7 @@ import {
 import { z } from "zod";
 
 // Tipo para request com user autenticado
-interface AuthenticatedRequest extends Express.Request {
+interface AuthenticatedRequest extends Request {
   user: { 
     claims: {
       sub: string;
@@ -32,23 +32,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup authentication middleware
   await setupAuth(app);
+  
+  // Test route (não requer autenticação)
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      environment: isReplitEnv ? 'replit' : 'local',
+      authenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      session: req.session ? true : false
+    });
+  });
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
+      
       // Em preview/local, retornar usuário mock sem acessar DB
       if (!isReplitEnv) {
         const mockUser = {
-          id: req.user?.claims.sub,
-          email: req.user?.claims.email || 'usuario@exemplo.com',
-          firstName: req.user?.claims.first_name || 'Usuário',
-          lastName: req.user?.claims.last_name || 'Exemplo',
-          profileImageUrl: req.user?.claims.profile_image_url || null,
+          id: authReq.user?.claims.sub,
+          email: authReq.user?.claims.email || 'usuario@exemplo.com',
+          firstName: authReq.user?.claims.first_name || 'Usuário',
+          lastName: authReq.user?.claims.last_name || 'Exemplo',
+          profileImageUrl: authReq.user?.claims.profile_image_url || null,
         };
         return res.json(mockUser);
       }
 
-      const userId = req.user.claims.sub;
+      const userId = authReq.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {

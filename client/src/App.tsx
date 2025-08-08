@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ReplitLogin from "./pages/ReplitLogin";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Accounts from "./pages/Accounts";
@@ -21,9 +22,10 @@ import Reports from './pages/Reports';
 import Budgets from './pages/Budgets';
 
 const RootComponent = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
 
-  if (isLoading) {
+  // Se está carregando pela primeira vez, mostra loading
+  if (isLoading && !error) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
@@ -32,8 +34,9 @@ const RootComponent = () => {
     </div>;
   }
 
-  if (!isAuthenticated) {
-    return <Landing />;
+  // Se não está autenticado ou houve erro 401, mostra login
+  if (!isAuthenticated || error) {
+    return <ReplitLogin />;
   }
 
   return <Home />;
@@ -49,6 +52,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<ReplitLogin />} />
             <Route path="/" element={<RootComponent />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>

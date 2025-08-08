@@ -114,13 +114,14 @@ export class MockStore {
   private readonly SESSION_KEY = 'detetive_financeiro_mock_session';
 
   constructor() {
+    // Desabilitado auto login - usando autenticação Replit
     // Tentar recuperar sessão do localStorage na inicialização
-    this.loadSessionFromStorage();
+    // this.loadSessionFromStorage();
     
     // Se não há sessão válida, fazer login automático com usuário exemplo
-    if (!this.currentSession) {
-      this.autoLoginWithDefaultUser();
-    }
+    // if (!this.currentSession) {
+    //   this.autoLoginWithDefaultUser();
+    // }
   }
 
   // ===== PERSISTÊNCIA DE SESSÃO =====

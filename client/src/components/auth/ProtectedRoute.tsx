@@ -14,7 +14,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      navigate('/auth');
+      navigate('/login');
     }
   }, [user, isLoading, navigate]);
 

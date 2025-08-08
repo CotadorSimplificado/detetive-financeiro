@@ -41,7 +41,8 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Mudando para false para funcionar sem HTTPS
+      sameSite: 'lax',
       maxAge: sessionTtl,
     },
   });
@@ -189,9 +190,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   }
 
+  console.log('[Auth] Checking authentication in Replit environment');
+  console.log('[Auth] req.isAuthenticated():', req.isAuthenticated());
+  console.log('[Auth] req.user:', req.user);
+  console.log('[Auth] req.session:', req.session);
+  
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user?.expires_at) {
+    console.log('[Auth] Authentication failed - user not authenticated or no expires_at');
     return res.status(401).json({ message: "Unauthorized" });
   }
 
