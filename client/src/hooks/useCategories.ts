@@ -1,14 +1,47 @@
-// Compatibilidade: Re-exporta o hook mock de categorias
+// Hook de categorias com migração gradual: Mock -> Real API
 import { useMockCategories } from '@/data/hooks/useMockCategories';
+import { useRealCategoriesAPI } from '@/hooks/api/useRealCategories';
+import { featureFlags } from '@/lib/featureFlags';
 
 export const useCategories = () => {
+  const useRealAPI = featureFlags.isEnabled('useRealCategories');
+  
+  // Selecionar implementação baseada na feature flag
   const mockResult = useMockCategories();
-  return {
-    data: mockResult.categories,
-    loading: mockResult.loading,
-    error: mockResult.error,
-    ...mockResult
-  };
+  const realResult = useRealCategoriesAPI();
+  
+  // Retornar resultado baseado na configuração
+  if (useRealAPI) {
+    // Log para debug durante migração
+    if (featureFlags.isEnabled('debugMode')) {
+      console.log('🔄 useCategories: usando API real', { 
+        categories: realResult.categories.length,
+        loading: realResult.loading 
+      });
+    }
+    
+    return {
+      data: realResult.categories,
+      loading: realResult.loading,
+      error: realResult.error,
+      ...realResult
+    };
+  } else {
+    // Log para debug durante migração
+    if (featureFlags.isEnabled('debugMode')) {
+      console.log('🎭 useCategories: usando mock', { 
+        categories: mockResult.categories.length,
+        loading: mockResult.loading 
+      });
+    }
+    
+    return {
+      data: mockResult.categories,
+      loading: mockResult.loading,
+      error: mockResult.error,
+      ...mockResult
+    };
+  }
 };
 
 // Função utilitária para sugestão de categoria baseada na descrição

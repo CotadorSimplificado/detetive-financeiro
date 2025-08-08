@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { DashboardCards } from "@/components/dashboard/DashboardCards";
+import { MigrationDebug } from "@/components/migration/MigrationDebug";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [showMigrationDebug, setShowMigrationDebug] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -21,15 +23,26 @@ const Index = () => {
                   Visão geral das suas finanças pessoais
                 </p>
               </div>
-              <Button 
-                className="bg-gradient-primary hover:opacity-90"
-                onClick={() => setTransactionModalOpen(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Transação
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowMigrationDebug(!showMigrationDebug)}
+                  title="Debug da Migração Backend"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+                <Button 
+                  className="bg-gradient-primary hover:opacity-90"
+                  onClick={() => setTransactionModalOpen(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Transação
+                </Button>
+              </div>
             </div>
             
+            {showMigrationDebug && <MigrationDebug />}
             <DashboardCards />
           </div>
         );
