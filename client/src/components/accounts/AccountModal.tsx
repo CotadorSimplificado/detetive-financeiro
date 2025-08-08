@@ -3,6 +3,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { AccountForm } from "./AccountForm";
 import { useCreateAccount, useUpdateAccount, useDeleteAccount, type Account } from "@/hooks/useAccounts";
 import { AccountFormData } from "@/lib/validations/account";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
 interface AccountModalProps {
@@ -14,6 +15,7 @@ interface AccountModalProps {
 
 export function AccountModal({ open, onOpenChange, account, mode }: AccountModalProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { user } = useAuth();
   
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
@@ -24,13 +26,13 @@ export function AccountModal({ open, onOpenChange, account, mode }: AccountModal
       if (mode === 'create') {
         const accountData = {
           ...data,
-          user_id: 'mock-user',
+          user_id: user?.id || 'mock-user',
           current_balance: data.initial_balance,
           sync_enabled: true
         };
         await createAccount.mutateAsync(accountData);
       } else if (account) {
-        await updateAccount.mutateAsync({ id: account.id, userId: 'mock-user', account: data });
+        await updateAccount.mutateAsync({ id: account.id, userId: user?.id || 'mock-user', account: data });
       }
       onOpenChange(false);
     } catch (error) {
